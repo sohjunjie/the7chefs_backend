@@ -1,0 +1,5 @@
+from django.apps import AppConfig
+
+
+class SevchefsApiConfig(AppConfig):
+    name = 'sevchefs_api'

@@ -1,0 +1,9 @@
+dj-database-url==0.4.1
+Django==1.9.6
+djangorestframework==3.6.3
+gunicorn==19.5.0
+olefile==0.44
+pep8==1.7.0
+Pillow==4.2.1
+psycopg2==2.7.1
+whitenoise==3.3.0

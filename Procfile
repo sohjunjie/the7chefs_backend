@@ -1,1 +1,1 @@
-web: gunicorn unigrin.wsgi --log-file -
+web: gunicorn the7chefs.wsgi --log-file -

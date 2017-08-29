@@ -31,7 +31,7 @@ Link to our [frontend](https://github.com/sohjunjie/the7chefs_frontend.git) code
         $ python manage.py migrate
 ```
 
-#### 4. Start the server on ur local machine with
+#### 4. Start the server on your local machine with
 ```
         $ python manage.py runserver
 ```

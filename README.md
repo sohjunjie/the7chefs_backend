@@ -9,7 +9,7 @@ Link to our [frontend](https://github.com/sohjunjie/the7chefs_frontend.git) code
 - Install pip
 - Install virtual environment
 
-#### 1. Activate virtual environment and change directory to `unigrinapp` folder and install related packages using the following command on `command prompt`
+#### 1. Activate virtual environment and change directory to `the7chefs` folder and install related packages using the following command on `command prompt`
 ```
         $ pip install -r requirements.txt
 ```

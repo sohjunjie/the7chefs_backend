@@ -1,7 +1,7 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.conf import settings
-from unigrin_api.models import UserProfile
+from sevchefs_api.models import UserProfile
 from rest_framework.authtoken.models import Token
 
 

@@ -20,10 +20,10 @@ class Recipe(models.Model):
     name = models.TextField(max_length=100, null=False, blank=False)
     description = models.TextField(max_length=500, null=False, blank=False)
     upload_datetime = models.DateTimeField(auto_now_add=True)
-    upload_by_user = models.ForeignKey(User, related_name='Recipes')
+    upload_by_user = models.ForeignKey(User, related_name='recipes')
     image = models.ImageField(blank=True, null=True)
     difficulty_level = models.IntegerField(default=0)
-    time_required = models.DurationField()
+    time_required = models.DurationField(null=True)
     ingredients = models.ManyToManyField(
         'Ingredient',
         through='RecipeIngredient',
@@ -40,8 +40,8 @@ class Recipe(models.Model):
 
 
 class RecipeComment(models.Model):
-    recipe = models.ForeignKey(Recipe)
-    user = models.ForeignKey(User)
+    recipe = models.ForeignKey(Recipe, related_name='comments')
+    user = models.ForeignKey(User, related_name='recipe_comments')
     text = models.TextField(max_length=500, null=False, blank=False)
     datetime = models.DateTimeField(auto_now_add=True)
 
@@ -53,7 +53,7 @@ class UserRecipeFavourites(models.Model):
 
 
 class RecipeInstruction(models.Model):
-    recipe = models.ForeignKey(Recipe, related_name='Recipe')
+    recipe = models.ForeignKey(Recipe, related_name='instructions')
     step_num = models.IntegerField(default=1)
     instruction = models.TextField(max_length=140, null=False, blank=False)
     image = models.ImageField(blank=True, null=True)

@@ -9,24 +9,39 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 
 from sevchefs_api.utils import RecipeUtils
+from sevchefs_api.utils import get_request_body_param
 
 
 class CommentRecipeView(APIView):
 
     @method_decorator(login_required)
     def post(self, request, pk):
-        """ 401 unauthorized error if not login """
+        """
+        Login user comment on a recipe
+
+        @body comment: user comment on the recipe
+        @return: http status of query
+        @raise HTTP_401_UNAUTHORIZED: user must be login
+        @raise HTTP_404_NOT_FOUND: must be a valid recipe id
+        @raise HTTP_400_BAD_REQUEST: recipe comment must not be empty
+        """
+
+        comment = get_request_body_param(request, 'comment').strip()
+        if comment == "":
+            return Response({'detail': 'recipe comment must not be empty'}, status=status.HTTP_400_BAD_REQUEST)
+
+        recipe = RecipeUtils.get_recipe_or_404(pk)
         comment_user = request.user
-        recipe = RecipeUtils.get_recipe_or_404()
 
-        return Response({'data': "success"}, status=status.HTTP_200_OK)
+        RecipeUtils.add_recipe_comments(recipe, comment_user, comment)
+
+        return Response({'data': 'success'}, status=status.HTTP_201_CREATED)
 
 
-# @login_required     # HTTP_403_FORBIDDEN return if not login
-# @ensure_csrf_cookie
-# class CommentRecipeView(APIView):
-#
-#     def post(self, request):
-#         # username = request.user.username
-#         # return Response({'data': username}, status=status.HTTP_200_OK)
-#         return Response('data', status=status.HTTP_200_OK)
+class RecipeView(APIView):
+    def post(self, request):
+        pass
+
+
+class RecipeIngredientView(APIView):
+    pass

@@ -39,6 +39,13 @@ class Recipe(models.Model):
         return self.favourited_by.all().count()
 
 
+class RecipeComment(models.Model):
+    recipe = models.ForeignKey(Recipe)
+    user = models.ForeignKey(User)
+    text = models.TextField(max_length=500, null=False, blank=False)
+    datetime = models.DateTimeField(auto_now_add=True)
+
+
 class UserRecipeFavourites(models.Model):
     userprofile = models.ForeignKey(UserProfile)
     recipe = models.ForeignKey(Recipe)
@@ -48,7 +55,7 @@ class UserRecipeFavourites(models.Model):
 class RecipeInstruction(models.Model):
     recipe = models.ForeignKey(Recipe, related_name='Recipe')
     step_num = models.IntegerField(default=1)
-    instruction = models.TextField(max_length=500, null=False, blank=False)
+    instruction = models.TextField(max_length=140, null=False, blank=False)
     image = models.ImageField(blank=True, null=True)
 
 

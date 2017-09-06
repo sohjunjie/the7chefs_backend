@@ -20,10 +20,15 @@ class RecipeUtils:
 def get_request_body_param(request, param):
 
     body_unicode = request.body.decode('utf-8')
-    body = json.loads(body_unicode)
+
+    try:
+        body = json.loads(body_unicode)
+    except json.decoder.JSONDecodeError:
+        return ""
+
     try:
         body_param_text = body[param]
     except KeyError:
-        body_param_text = ""
+        return ""
 
     return body_param_text

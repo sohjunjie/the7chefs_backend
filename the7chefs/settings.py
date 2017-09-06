@@ -38,10 +38,24 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_nose',
     'sevchefs_api',
     'rest_framework',
     'rest_framework.authtoken',
 ]
+
+if os.environ.get('SELF_HOSTING'):
+    MEDIA_ROOT = "/var/www/media"
+    MEDIA_URL = os.environ.get('MEDIA_ADDRESS', 'http://localhost:8000/media/')
+else:
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+NOSE_ARGS = [
+    '--cover-erase',
+    '--cover-package=sevchefs_api',
+]
+
 
 MIDDLEWARE_CLASSES = [
     'whitenoise.middleware.WhiteNoiseMiddleware',

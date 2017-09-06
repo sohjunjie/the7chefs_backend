@@ -18,3 +18,19 @@ class UserTests(base_tests.BaseGuestUser):
 
         response = self.client.post(reverse('user-signup'), json.dumps(signup_details), 'application/json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_sign_up_w_missing_details_return_400(self):
+        """
+        Ensure signup is rejected if missing fields provided
+        """
+        signup_details = {'username': '', 'email': 'user1@example.com', 'password': 'password1'}
+        response = self.client.post(reverse('user-signup'), json.dumps(signup_details), 'application/json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        signup_details = {'username': 'user1', 'email': '', 'password': 'password1'}
+        response = self.client.post(reverse('user-signup'), json.dumps(signup_details), 'application/json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        signup_details = {'username': 'user1', 'email': 'user1@example.com', 'password': ''}
+        response = self.client.post(reverse('user-signup'), json.dumps(signup_details), 'application/json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

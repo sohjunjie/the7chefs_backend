@@ -14,11 +14,12 @@ from sevchefs_api.models import Recipe
 from sevchefs_api.serializers import RecipeSerializer
 from sevchefs_api.utils import RecipeUtils
 from sevchefs_api.utils import get_request_body_param
+# from rest_framework.decorators import permission_classes
+# @permission_classes((IsAuthenticated, ))
 
 
 class CommentRecipeView(APIView):
 
-    @method_decorator(login_required)
     def post(self, request, pk):
         """
         Login user comment on a recipe
@@ -54,7 +55,6 @@ class RecipeView(APIView):
 
 class RecipeUploadView(APIView):
 
-    @method_decorator(login_required)
     def post(self, request):
         """
         Create an empty recipe

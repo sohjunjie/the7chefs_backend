@@ -98,7 +98,7 @@ class RecipeIngredient(models.Model):
 
 
 class RecipeTag(models.Model):
-    text = models.TextField(unique=True)
+    text = models.TextField(blank=False, null=False, unique=True)
 
 
 class RecipeTagTable(models.Model):

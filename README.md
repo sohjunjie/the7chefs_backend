@@ -36,8 +36,3 @@ Link to our [frontend](https://github.com/sohjunjie/the7chefs_frontend.git) code
         $ python manage.py runserver
 ```
 You can create your database objects such as users manually from http://127.0.0.1:8000/admin after running the server instance with ur local machine
-
-## List of supported apis
-
-
-## Apis not supported

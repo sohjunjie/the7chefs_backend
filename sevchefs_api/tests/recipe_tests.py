@@ -4,7 +4,7 @@ from django.core.urlresolvers import reverse
 import json
 
 from rest_framework import status
-from sevchefs_api.models import Recipe
+from sevchefs_api.models import Recipe, RecipeTag
 from sevchefs_api.tests import base_tests
 
 
@@ -87,3 +87,26 @@ class RecipeTests(base_tests.BaseApiTest):
         recipe_dict = {'name': '', 'description': 'description', 'difficulty': 2}
         response = self.client.post(reverse('recipe-upload'), json.dumps(recipe_dict), 'application/json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_add_tag_to_recipe(self):
+        """
+        Ensure able to add tag to recipe
+        """
+        recipe = Recipe.objects.create(name='Recipe1', description='Recipe1', upload_by_user=self.user)
+        recipe_tag = RecipeTag.objects.create(text="Meat")
+        recipe_tag_list = {'tag_ids': [recipe_tag.id]}
+
+        response = self.client.post(reverse('recipe-add-tag', args=[recipe.id]), json.dumps(recipe_tag_list), 'application/json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_user_cannot_add_tag_to_recipe_of_other_user(self):
+        """
+        Ensure other user cannot add tag to a recipe
+        """
+        other_user = User.objects.create_user('other', 'other@api.com', 'testpassword')
+        recipe = Recipe.objects.create(name='Recipe1', description='Recipe1', upload_by_user=other_user)
+        recipe_tag = RecipeTag.objects.create(text="Meat")
+        recipe_tag_list = {'tag_ids': [recipe_tag.id]}
+
+        response = self.client.post(reverse('recipe-add-tag', args=[recipe.id]), json.dumps(recipe_tag_list), 'application/json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)

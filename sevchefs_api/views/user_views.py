@@ -26,9 +26,9 @@ class UserSignUpView(APIView):
         @raise HTTP_400_BAD_REQUEST: signup details must not be empty
         """
 
-        email = get_request_body_param(request, 'email')
-        password = get_request_body_param(request, 'password')
-        username = get_request_body_param(request, 'username')
+        email = get_request_body_param(request, 'email', '')
+        password = get_request_body_param(request, 'password', '')
+        username = get_request_body_param(request, 'username', '')
 
         if email == "":
             return Response({'detail': 'email must not be empty'}, status=status.HTTP_400_BAD_REQUEST)

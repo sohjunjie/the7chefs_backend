@@ -10,7 +10,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 
-from sevchefs_api.models import Recipe
+from sevchefs_api.models import Recipe, RecipeTagTable
 from sevchefs_api.serializers import RecipeSerializer
 from sevchefs_api.utils import RecipeUtils
 from sevchefs_api.utils import get_request_body_param
@@ -31,7 +31,7 @@ class CommentRecipeView(APIView):
         @raise HTTP_400_BAD_REQUEST: recipe comment must not be empty
         """
 
-        comment = get_request_body_param(request, 'comment').strip()
+        comment = get_request_body_param(request, 'comment', '').strip()
         if comment == "":
             return Response({'detail': 'recipe comment must not be empty'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -59,17 +59,17 @@ class RecipeUploadView(APIView):
         """
         Create an empty recipe
 
-        @param str name: recipe name
-        @param str description: recipe description
-        @param int difficulty: difficulty level from 1 - 5
-        @param int duration_minute
-        @param int duration_hour
+        @body str name: recipe name
+        @body str description: recipe description
+        @body int difficulty: difficulty level from 1 - 5
+        @body int duration_minute
+        @body int duration_hour
         """
-        recipe_name = get_request_body_param(request, 'name').strip()
-        recipe_desc = get_request_body_param(request, 'description').strip()
-        recipe_diff = get_request_body_param(request, 'difficulty')
-        duration_minute = get_request_body_param(request, 'duration_minute')
-        duration_hour = get_request_body_param(request, 'duration_hour')
+        recipe_name = get_request_body_param(request, 'name', '').strip()
+        recipe_desc = get_request_body_param(request, 'description', '').strip()
+        recipe_diff = get_request_body_param(request, 'difficulty', 0)
+        duration_minute = get_request_body_param(request, 'duration_minute', 0)
+        duration_hour = get_request_body_param(request, 'duration_hour', 0)
 
         if recipe_name == "":
             return Response({'detail': 'recipe name must not be empty'}, status=status.HTTP_400_BAD_REQUEST)
@@ -90,6 +90,37 @@ class RecipeUploadView(APIView):
                               upload_by_user=upload_user)
 
         return Response({'data': 'success'}, status=status.HTTP_201_CREATED)
+
+
+# TODO: TEST
+class RecipeAddTagView(APIView):
+
+    def post(self, request, pk):
+        """
+        Add tags to a recipe
+
+        @body int[] tag_ids: list of tag id
+        @raise HTTP_401_UNAUTHORIZED: only creator of recipe can add tag to recipe
+        """
+
+        recipe = RecipeUtils.get_recipe_or_404(pk)
+        if recipe.upload_by_user != request.user:
+            return Response({'detail': 'only creator of recipe can add tag to recipe'},
+                            status=status.HTTP_401_UNAUTHORIZED)
+
+        tag_ids = get_request_body_param(request, 'tag_ids', [])
+
+        tag_ids_added = []
+        for tag_id in tag_ids:
+            tag = RecipeUtils.get_recipe_tag_or_none(tag_id)
+            if tag is not None:
+                RecipeTagTable.objects.create(recipe=recipe, tag=tag)
+                tag_ids_added.append(tag_id)
+
+        response_data = {'tag_ids_added': tag_ids_added,
+                         'tag_ids_not_added': list(set(tag_ids) - set(tag_ids_added))}
+
+        return Response({'data': response_data}, status=status.HTTP_201_CREATED)
 
 
 class RecipeImageUploadView(APIView):

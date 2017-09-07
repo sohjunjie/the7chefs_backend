@@ -46,6 +46,14 @@ class Recipe(models.Model):
         through='UserRecipeFavourites',
         through_fields=('recipe', 'userprofile'),
     )
+    tags = models.ManyToManyField(
+        'RecipeTag',
+        through='RecipeTagTable',
+        through_fields=('recipe', 'tag'),
+    )
+
+    def get_recipe_tags(self):
+        return self.tags.all()
 
     def get_recipe_ingredients(self):
         return self.ingredients.all()
@@ -87,3 +95,12 @@ class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(Recipe)
     ingredient = models.ForeignKey(Ingredient)
     serving_size = models.TextField()
+
+
+class RecipeTag(models.Model):
+    text = models.TextField(unique=True)
+
+
+class RecipeTagTable(models.Model):
+    recipe = models.ForeignKey(Recipe)
+    tag = models.ForeignKey(RecipeTag)

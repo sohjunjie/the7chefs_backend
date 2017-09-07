@@ -5,7 +5,9 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from sevchefs_api.models import UserProfile
 from sevchefs_api.utils import get_request_body_param
+from sevchefs_api.serializers import UserProfileSerializer
 
 
 class UserSignUpView(APIView):
@@ -21,9 +23,7 @@ class UserSignUpView(APIView):
         @body password: user comment on the recipe
 
         @return: http status of query
-        @raise HTTP_401_UNAUTHORIZED: user must be login
-        @raise HTTP_404_NOT_FOUND: must be a valid recipe id
-        @raise HTTP_400_BAD_REQUEST: recipe comment must not be empty
+        @raise HTTP_400_BAD_REQUEST: signup details must not be empty
         """
 
         email = get_request_body_param(request, 'email')
@@ -39,3 +39,17 @@ class UserSignUpView(APIView):
 
         User.objects.create_user(username, email, password)
         return Response({'data': 'success'}, status=status.HTTP_201_CREATED)
+
+
+class UserProfileView(APIView):
+
+    permission_classes = (AllowAny,)
+
+    def get(self, request, pk):
+        """
+        View a user profile
+        """
+        user = User.objects.get(pk=pk)
+        user_profile = UserProfile.objects.get(user=user)
+        serializer = UserProfileSerializer(user_profile)
+        return Response({'data': serializer.data}, status=status.HTTP_200_OK)

@@ -34,3 +34,11 @@ class UserTests(base_tests.BaseGuestUser):
         signup_details = {'username': 'user1', 'email': 'user1@example.com', 'password': ''}
         response = self.client.post(reverse('user-signup'), json.dumps(signup_details), 'application/json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_get_user_profile(self):
+        """
+        Ensure able to view user profile
+        """
+        superuser = User.objects.create_superuser('test', 'test@api.com', 'testpassword')
+        response = self.client.get(reverse('user-profile-detail', args=[superuser.id]))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)

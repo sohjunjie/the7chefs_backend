@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 
+from rest_framework import generics
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -52,4 +53,16 @@ class UserProfileView(APIView):
         user = User.objects.get(pk=pk)
         user_profile = UserProfile.objects.get(user=user)
         serializer = UserProfileSerializer(user_profile)
+        return Response({'data': serializer.data}, status=status.HTTP_200_OK)
+
+
+# TODO: MIGHT BE ADAPTED FOR USER PROFILE SEARCH FILTERING
+class UserProfileListView(generics.ListAPIView):
+    queryset = UserProfile.objects.all()
+    serializer_class = UserProfileSerializer
+    permission_classes = (AllowAny,)
+
+    def list(self, request):
+        queryset = self.get_queryset()
+        serializer = UserProfileSerializer(queryset, many=True)
         return Response({'data': serializer.data}, status=status.HTTP_200_OK)

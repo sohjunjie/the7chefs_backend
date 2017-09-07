@@ -39,6 +39,14 @@ class UserTests(base_tests.BaseGuestUser):
         """
         Ensure able to view user profile
         """
-        superuser = User.objects.create_superuser('test', 'test@api.com', 'testpassword')
-        response = self.client.get(reverse('user-profile-detail', args=[superuser.id]))
+        user = User.objects.create_user('test', 'test@api.com', 'testpassword')
+        response = self.client.get(reverse('user-profile-detail', args=[user.id]))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_get_all_user_profile(self):
+        """
+        Ensure able to view all user profile
+        """
+        user = User.objects.create_user('test', 'test@api.com', 'testpassword')
+        response = self.client.get(reverse('user-all-detail'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)

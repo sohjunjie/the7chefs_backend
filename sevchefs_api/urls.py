@@ -9,6 +9,7 @@ urlpatterns = [
     url(r'api/v1.0/recipe/add/tag/(?P<pk>[0-9]+)/$', views.RecipeAddTagView.as_view(), name="recipe-add-tag"),
 
     url(r'api/v1.0/user/signup/$', views.UserSignUpView.as_view(), name="user-signup"),
+    url(r'api/v1.0/user/all/$', views.UserProfileListView.as_view(), name="user-all-detail"),
     url(r'api/v1.0/user/profile/(?P<pk>[0-9]+)/$', views.UserProfileView.as_view(), name="user-profile-detail"),
 
 ]

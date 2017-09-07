@@ -47,6 +47,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 class UserProfileSerializer(serializers.ModelSerializer):
 
     avatar_url = serializers.SerializerMethodField()
+    user = UserSerializer(many=False)
 
     class Meta:
         model = UserProfile

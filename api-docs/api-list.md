@@ -29,9 +29,9 @@ POST - api/v1.0/recipe/upload/
 Sample Request Body:
 {
     "name": "Recipe 1",
-    "description": "New Recipe"
-    "difficulty": 0
-    "duration_minute": 60
+    "description": "New Recipe",
+    "difficulty": 0,
+    "duration_minute": 60,
     "duration_hour": 1
 }
 ```
@@ -83,8 +83,8 @@ POST - api/v1.0/user/signup/
 ```
 Sample Request Body:
 {
-    "email": "admin@example.com"
-    "username": "admin"
+    "email": "admin@example.com",
+    "username": "admin",
     "password": "password1"
 }
 ```

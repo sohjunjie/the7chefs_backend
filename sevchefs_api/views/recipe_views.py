@@ -5,13 +5,14 @@ from django.shortcuts import render
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
 
+from rest_framework import generics
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from sevchefs_api.models import Recipe, RecipeTagTable
-from sevchefs_api.serializers import RecipeSerializer
+from sevchefs_api.serializers import RecipeSerializer, RecipeImageSerializer
 from sevchefs_api.utils import RecipeUtils
 from sevchefs_api.utils import get_request_body_param
 # from rest_framework.decorators import permission_classes
@@ -50,6 +51,18 @@ class RecipeView(APIView):
         """
         recipe = RecipeUtils.get_recipe_or_404(pk)
         serializer = RecipeSerializer(recipe)
+        return Response({'data': serializer.data}, status=status.HTTP_200_OK)
+
+
+# TODO: ADD IN API DOCS
+class RecipeListView(generics.ListAPIView):
+    queryset = Recipe.objects.all()
+    serializer_class = RecipeSerializer
+    permission_classes = (AllowAny,)
+
+    def list(self, request):
+        queryset = self.get_queryset()
+        serializer = RecipeSerializer(queryset, many=True)
         return Response({'data': serializer.data}, status=status.HTTP_200_OK)
 
 
@@ -124,7 +137,15 @@ class RecipeAddTagView(APIView):
 
 
 class RecipeImageUploadView(APIView):
-    pass
+
+    # def put(self, request, pk, format=None):
+    def put(self, request, pk):
+        recipe = RecipeUtils.get_recipe_or_404(pk)
+        serializer = RecipeImageSerializer(recipe, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class RecipeIngredientView(APIView):

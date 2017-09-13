@@ -42,11 +42,23 @@ INSTALLED_APPS = [
     'sevchefs_api',
     'rest_framework',
     'rest_framework.authtoken',
+    'storages',
 ]
 
-MEDIA_ROOT = '/var/www/media'
-MEDIA_URL = "/media/"
+if os.environ.get('SELF_HOSTING'):
+    MEDIA_ROOT = '/var/www/media'
+    MEDIA_URL = "/media/"
+else:
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 
+
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
+AWS_QUERYSTRING_AUTH = False
+AWS_HEADERS = {
+    'Cache-Control': 'max-age=86400',
+}
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 NOSE_ARGS = [

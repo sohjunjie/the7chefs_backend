@@ -1,5 +1,5 @@
-.DSStore
-.DS_Store
+# dotenv
+.env
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -13,10 +13,6 @@ __pycache__/
 .Python
 .env/
 
-
 # Unit test / coverage reports
 .coverage
 .coverage.*
-
-# dotenv
-.env

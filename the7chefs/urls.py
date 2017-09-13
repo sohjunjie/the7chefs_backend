@@ -23,13 +23,12 @@ from rest_framework.authtoken import views
 
 import os
 
+
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^', include('sevchefs_api.urls')),
     url(r'^api/v1.0/login', views.obtain_auth_token),
-
 ]
 
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-# if settings.DEBUG:
-#     urlpatterns.append(url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}))
+if os.environ.get('SELF_HOSTING'):
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

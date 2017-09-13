@@ -140,6 +140,9 @@ class RecipeImageUploadView(APIView):
 
     # def put(self, request, pk, format=None):
     def put(self, request, pk):
+
+        print(request.data)
+
         recipe = RecipeUtils.get_recipe_or_404(pk)
         serializer = RecipeImageSerializer(recipe, data=request.data)
         if serializer.is_valid():

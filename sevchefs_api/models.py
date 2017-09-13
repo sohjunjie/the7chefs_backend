@@ -33,7 +33,7 @@ class Recipe(models.Model):
     description = models.TextField(max_length=500, null=False, blank=False)
     upload_datetime = models.DateTimeField(auto_now_add=True)
     upload_by_user = models.ForeignKey(User, related_name='recipes')
-    image = models.ImageField(upload_to='recipe_image_directory_path', blank=True, null=True)
+    image = models.ImageField(upload_to=recipe_image_directory_path, blank=True, null=True)
     difficulty_level = models.IntegerField(default=0)
     time_required = models.DurationField(null=True)
     ingredients = models.ManyToManyField(
@@ -82,13 +82,13 @@ class RecipeInstruction(models.Model):
     recipe = models.ForeignKey(Recipe, related_name='instructions')
     step_num = models.IntegerField(default=1)
     instruction = models.TextField(max_length=140, null=False, blank=False)
-    image = models.ImageField(upload_to='recipe_instruction_image_directory_path', blank=True, null=True)
+    image = models.ImageField(upload_to=recipe_instruction_image_directory_path, blank=True, null=True)
 
 
 class Ingredient(models.Model):
     name = models.TextField(max_length=100, blank=False, null=False)
     description = models.TextField(max_length=200)
-    image = models.ImageField(upload_to='ingredient_image_directory_path', null=True, blank=True)
+    image = models.ImageField(upload_to=ingredient_image_directory_path, null=True, blank=True)
 
 
 class RecipeIngredient(models.Model):

@@ -44,11 +44,9 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
 ]
 
-if os.environ.get('SELF_HOSTING'):
-    MEDIA_ROOT = "/var/www/media"
-    MEDIA_URL = os.environ.get('MEDIA_ADDRESS', 'http://localhost:8000/media/')
-else:
-    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+MEDIA_ROOT = '/var/www/media'
+MEDIA_URL = "/media/"
+
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 NOSE_ARGS = [

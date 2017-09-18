@@ -37,7 +37,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def get_image_url(self, recipe):
         if not recipe.image:
-            return None
+            return ""
 
         image_url = recipe.image.url
         request = self.context.get('request')

@@ -1,20 +1,29 @@
+import uuid
 from django.db import models
 from django.contrib.auth.models import User
 
 
 def user_avatar_directory_path(instance, filename):
+    ext = filename.split('.')[-1]
+    filename = "%s.%s" % (uuid.uuid4(), ext)
     return 'user/{0}/{1}'.format(instance.id, filename)
 
 
 def recipe_image_directory_path(instance, filename):
+    ext = filename.split('.')[-1]
+    filename = "%s.%s" % (uuid.uuid4(), ext)
     return 'recipe/{0}/{1}'.format(instance.id, filename)
 
 
 def ingredient_image_directory_path(instance, filename):
+    ext = filename.split('.')[-1]
+    filename = "%s.%s" % (uuid.uuid4(), ext)
     return 'ingredient/{0}/{1}'.format(instance.id, filename)
 
 
 def recipe_instruction_image_directory_path(instance, filename):
+    ext = filename.split('.')[-1]
+    filename = "%s.%s" % (uuid.uuid4(), ext)
     return 'recipe/{0}/{1}/{2}/'.format(instance.recipe.id, instance.id, filename)
 
 

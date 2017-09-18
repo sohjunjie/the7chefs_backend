@@ -26,7 +26,7 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
 
 class RecipeSerializer(serializers.ModelSerializer):
 
-    upload_by_user = UserSerializer(many=False)
+    # upload_by_user = UserSerializer(many=False)
     image_url = serializers.SerializerMethodField()
     ingredients = RecipeIngredientSerializer(many=True)
 

@@ -36,12 +36,14 @@ class RecipeSerializer(serializers.ModelSerializer):
                   'time_required', 'upload_datetime', 'image_url', 'ingredients')
 
     def get_image_url(self, recipe):
-        if not recipe.image:
+
+        request = self.context.get('request')
+        if not (recipe.image and request):
             return None
 
         image_url = recipe.image.url
         request = self.context.get('request')
-        return None     # request.build_absolute_uri(image_url)
+        return request.build_absolute_uri(image_url)
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -54,7 +56,9 @@ class UserProfileSerializer(serializers.ModelSerializer):
         fields = ('user', 'description', 'avatar_url')
 
     def get_avatar_url(self, user_profile):
-        if not user_profile.avatar:
+
+        request = self.context.get('request')
+        if not (user_profile.avatar and request):
             return None
 
         avatar_url = user_profile.avatar.url

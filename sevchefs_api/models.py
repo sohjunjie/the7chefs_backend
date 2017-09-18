@@ -2,6 +2,10 @@ from django.db import models
 from django.contrib.auth.models import User
 
 
+def user_avatar_directory_path(instance, filename):
+    return 'user/{0}/{1}'.format(instance.id, filename)
+
+
 def recipe_image_directory_path(instance, filename):
     return 'recipe/{0}/{1}'.format(instance.id, filename)
 
@@ -17,7 +21,7 @@ def recipe_instruction_image_directory_path(instance, filename):
 class UserProfile(models.Model):
     user = models.OneToOneField(User)
     description = models.TextField(max_length=500, null=True)
-    avatar = models.ImageField(blank=True, null=True)
+    avatar = models.ImageField(upload_to=user_avatar_directory_path, blank=True, null=True)
     favourited_recipes = models.ManyToManyField(
         'Recipe',
         through='UserRecipeFavourites',

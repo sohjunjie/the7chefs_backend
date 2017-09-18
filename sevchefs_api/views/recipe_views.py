@@ -45,6 +45,9 @@ class CommentRecipeView(APIView):
 
 
 class RecipeView(APIView):
+
+    permission_classes = (AllowAny, )
+
     def get(self, request, pk):
         """
         View recipe details by id

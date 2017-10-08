@@ -141,7 +141,6 @@ class RecipeAddTagView(APIView):
 
 class RecipeImageUploadView(APIView):
 
-    # def put(self, request, pk, format=None):
     def put(self, request, pk):
 
         recipe = RecipeUtils.get_recipe_or_404(pk)

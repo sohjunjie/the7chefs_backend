@@ -22,6 +22,17 @@ class AnonymousUserRecipeTests(base_tests.BaseGuestUser):
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
+    def test_user_can_view_recipe_list(self):
+        """
+        Ensure guest user can view recipe list
+        """
+        other_user = User.objects.create_user('other', 'other@api.com', 'testpassword')
+        recipe = Recipe.objects.create(name='Recipe1', description='Recipe1', upload_by_user=other_user)
+
+        response = self.client.get(reverse('recipe-list-view'))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertContains(response, 'Recipe1')
+
 
 class RecipeTests(base_tests.BaseApiTest):
 

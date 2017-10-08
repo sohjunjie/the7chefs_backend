@@ -28,9 +28,10 @@ def recipe_instruction_image_directory_path(instance, filename):
 
 
 class UserProfile(models.Model):
-    user = models.OneToOneField(User)
+    user = models.OneToOneField(User, related_name="userprofile")
     description = models.TextField(max_length=500, null=True)
     avatar = models.ImageField(upload_to=user_avatar_directory_path, blank=True, null=True)
+    follows = models.ManyToManyField('UserProfile', related_name='followed_by', blank=True)
     favourited_recipes = models.ManyToManyField(
         'Recipe',
         through='UserRecipeFavourites',
@@ -39,6 +40,12 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return self.user.username
+
+    def following_count(self):
+        return self.follows.all().count()
+
+    def followers_count(self):
+        return self.followed_by.all().count()
 
 
 class Recipe(models.Model):

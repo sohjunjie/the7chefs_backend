@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.http import Http404
 
 from rest_framework import generics
 from rest_framework import status
@@ -14,6 +15,9 @@ from sevchefs_api.serializers import UserProfileSerializer
 class UserSignUpView(APIView):
 
     permission_classes = (AllowAny,)
+
+    def response_with_400(self, info):
+        return Response({"detail": info}, status=status.HTTP_400_BAD_REQUEST)
 
     def post(self, request):
         """
@@ -38,8 +42,48 @@ class UserSignUpView(APIView):
         if password == "":
             return Response({'detail': 'password must not be empty'}, status=status.HTTP_400_BAD_REQUEST)
 
-        User.objects.create_user(username, email, password)
+        try:
+            User.objects.create_user(username, email, password)
+        except:
+            return self.response_with_400("The username entered already exists")
         return Response({'data': 'success'}, status=status.HTTP_201_CREATED)
+
+
+class FollowUserView(APIView):
+
+    def response_with_400(self, info):
+        return Response({"detail": info}, status=status.HTTP_400_BAD_REQUEST)
+
+    def get_userprofile(self, user_id):
+        try:
+            userprofile = UserProfile.objects.get(user_id=user_id)
+        except UserProfile.DoesNotExist:
+            raise Http404()
+        return userprofile
+
+    def post(self, request, pk):
+        """
+        Follow a user with user id
+        """
+        current_userprofile = self.get_userprofile(request.user.id)
+        to_follow_userprofile = self.get_userprofile(pk)
+        try:
+            current_userprofile.follows.add(pk)
+        except:
+            return self.response_with_400("Already followed user")
+        return Response({"success": True}, status=status.HTTP_201_CREATED)
+
+    def delete(self, request, pk):
+        """
+        Unfollow a user with user id
+        """
+        current_userprofile = self.get_userprofile(request.user.id)
+        to_unfollow_userprofile = self.get_userprofile(pk)
+        if current_userprofile.follows.filter(pk=pk).exists():
+            current_userprofile.follows.remove(pk)
+        else:
+            return self.response_with_400("Not already a follower of the target user")
+        return Response({"success": True}, status=status.HTTP_200_OK)
 
 
 class UserProfileView(APIView):

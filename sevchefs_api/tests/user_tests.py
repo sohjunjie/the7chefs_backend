@@ -19,6 +19,18 @@ class UserTests(base_tests.BaseGuestUser):
         response = self.client.post(reverse('user-signup'), json.dumps(signup_details), 'application/json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
+    def test_guest_user_sign_up_400_when_username_taken(self):
+        """
+        Ensure guest user can sign up
+        """
+        userOne = User.objects.create(username="user1", password="qwe123qwe123")
+        signup_details = {'username': 'user1',
+                          'email': 'user1@example.com',
+                          'password': 'password1'}
+
+        response = self.client.post(reverse('user-signup'), json.dumps(signup_details), 'application/json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
     def test_sign_up_w_missing_details_return_400(self):
         """
         Ensure signup is rejected if missing fields provided
@@ -50,3 +62,69 @@ class UserTests(base_tests.BaseGuestUser):
         user = User.objects.create_user('test', 'test@api.com', 'testpassword')
         response = self.client.get(reverse('user-all-detail'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
+class FollowUnfollowApiTest(base_tests.BaseApiTest):
+    def test_follow_user_success(self):
+        """
+        ensure user can successfully follow someone
+        """
+        userOne = User.objects.create(username='user1', password='qwe123qwe123')
+        userTwo = User.objects.create(username='user2', password='qwe123qwe123')
+
+        response = self.client.post(reverse('user-follow', args=[userOne.userprofile.user_id]))
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        response = self.client.post(reverse('user-follow', args=[userTwo.userprofile.user_id]))
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(self.user.userprofile.follows.filter(pk=userOne.userprofile.user_id).exists())
+        self.assertTrue(self.user.userprofile.follows.filter(pk=userTwo.userprofile.user_id).exists())
+
+    def test_unfollow_user_success(self):
+        """
+        ensure user can successfully unfollow someone
+        """
+        userOne = User.objects.create(username='user1', password='qwe123qwe123')
+        userTwo = User.objects.create(username='user2', password='qwe123qwe123')
+
+        self.user.userprofile.follows.add(userOne.userprofile)
+        self.user.userprofile.follows.add(userTwo.userprofile)
+
+        response = self.client.delete(reverse('user-follow', args=[userOne.userprofile.user_id]))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = self.client.delete(reverse('user-follow', args=[userTwo.userprofile.user_id]))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertFalse(self.user.userprofile.follows.filter(pk=userOne.userprofile.user_id).exists())
+        self.assertFalse(self.user.userprofile.follows.filter(pk=userTwo.userprofile.user_id).exists())
+
+    def test_tofollow_upon_false_args(self):
+        """
+        Ensure correct HTTP Response generated when following non-existing user
+        """
+        response = self.client.post(reverse('user-follow', args=[123]))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_already_follow_user(self):
+        """
+        Ensure correct HTTP Response generated when user already followed
+        """
+        userOne = User.objects.create(username='user1', password='qwe123qwe123')
+        self.user.userprofile.follows.add(userOne.userprofile)
+
+        response = self.client.post(reverse('user-follow', args=[userOne.userprofile.user_id]))
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_unfollow_upon_false_args(self):
+        """
+        Ensure correct HTTP Response generated when unfollowing non-existing user
+        """
+        response = self.client.delete(reverse('user-follow', args=[123]))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_already_unfollow_user(self):
+        """
+        Ensure correct HTTP Response generated when unfollowing already unfollowed user
+        """
+        userOne = User.objects.create(username='user1', password='qwe123qwe123')
+
+        response = self.client.delete(reverse('user-follow', args=[userOne.userprofile.user_id]))
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

@@ -14,4 +14,6 @@ urlpatterns = [
     url(r'api/v1.0/user/all/$', views.UserProfileListView.as_view(), name="user-all-detail"),
     url(r'api/v1.0/user/profile/(?P<pk>[0-9]+)/$', views.UserProfileView.as_view(), name="user-profile-detail"),
 
+    url(r'^api/v1.0/follow/user/(?P<pk>.+)/$', views.FollowUserView.as_view(), name='user-follow'),
+
 ]

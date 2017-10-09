@@ -13,7 +13,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from sevchefs_api.models import Recipe, RecipeTagTable
 from sevchefs_api.serializers import RecipeSerializer, RecipeImageSerializer
-from sevchefs_api.utils import RecipeUtils
+from sevchefs_api.utils import RecipeUtils, UserUtils
 from sevchefs_api.utils import get_request_body_param
 # from rest_framework.decorators import permission_classes
 # @permission_classes((IsAuthenticated, ))
@@ -54,6 +54,19 @@ class RecipeView(APIView):
         """
         recipe = RecipeUtils.get_recipe_or_404(pk)
         serializer = RecipeSerializer(recipe)
+        return Response({'data': serializer.data}, status=status.HTTP_200_OK)
+
+
+class UserRecipeListView(generics.ListAPIView):
+    queryset = Recipe.objects.all()
+    serializer_class = RecipeSerializer
+    permission_classes = (AllowAny,)
+
+    def list(self, request, pk):
+        user = UserUtils.get_user_or_404(pk)
+        recipes = self.get_queryset()
+        recipes = recipes.filter(upload_by_user=user)
+        serializer = RecipeSerializer(recipes, many=True)
         return Response({'data': serializer.data}, status=status.HTTP_200_OK)
 
 
@@ -141,14 +154,31 @@ class RecipeAddTagView(APIView):
 
 class RecipeImageUploadView(APIView):
 
-    def put(self, request, pk):
+    def post(self, request, pk):
 
         recipe = RecipeUtils.get_recipe_or_404(pk)
+
+        if recipe.upload_by_user != request.user:
+            return Response({'detail': 'only creator of recipe can upload image to the recipe'},
+                            status=status.HTTP_401_UNAUTHORIZED)
+
         serializer = RecipeImageSerializer(recipe, data=request.data)
         if serializer.is_valid():
+            RecipeUtils.delete_recipe_image(recipe)
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+
+        recipe = RecipeUtils.get_recipe_or_404(pk)
+
+        if recipe.upload_by_user != request.user:
+            return Response({'detail': 'only creator of recipe can delete image of recipe'},
+                            status=status.HTTP_401_UNAUTHORIZED)
+
+        RecipeUtils.delete_recipe_image(recipe)
+        return Response({'detail': 'deleted'}, status=status.HTTP_200_OK)
 
 
 class RecipeIngredientView(APIView):

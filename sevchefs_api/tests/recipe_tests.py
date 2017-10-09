@@ -7,6 +7,11 @@ from rest_framework import status
 from sevchefs_api.models import Recipe, RecipeTag
 from sevchefs_api.tests import base_tests
 
+from tempfile import mkdtemp
+from shutil import rmtree
+from django.test.utils import override_settings
+from django.core.files.uploadedfile import SimpleUploadedFile
+
 
 class AnonymousUserRecipeTests(base_tests.BaseGuestUser):
 
@@ -32,6 +37,27 @@ class AnonymousUserRecipeTests(base_tests.BaseGuestUser):
         response = self.client.get(reverse('recipe-list-view'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertContains(response, 'Recipe1')
+
+    def test_user_can_view_otheruser_recipe_list(self):
+        """
+        Ensure guest user can view recipe list
+        """
+        other_user = User.objects.create_user('other', 'other@api.com', 'testpassword')
+        recipe = Recipe.objects.create(name='Recipe1', description='Recipe1', upload_by_user=other_user)
+        recipe2 = Recipe.objects.create(name='Recipe2', description='Recipe2', upload_by_user=other_user)
+
+        response = self.client.get(reverse('user-recipe-list', args=[other_user.id]))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertContains(response, 'Recipe1')
+        self.assertContains(response, 'Recipe2')
+
+    def test_view_nonexist_user_recipe_list_404(self):
+        """
+        Ensure guest user can view recipe list
+        """
+
+        response = self.client.get(reverse('user-recipe-list', args=[123]))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
 class RecipeTests(base_tests.BaseApiTest):
@@ -121,3 +147,46 @@ class RecipeTests(base_tests.BaseApiTest):
 
         response = self.client.post(reverse('recipe-add-tag', args=[recipe.id]), json.dumps(recipe_tag_list), 'application/json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class RecipeImageTest(base_tests.BaseApiTest):
+
+    def setUp(self):
+        super(RecipeImageTest, self).setUp()
+        self.media_folder = mkdtemp()
+
+    def tearDown(self):
+        super(RecipeImageTest, self).tearDown()
+        rmtree(self.media_folder)
+
+    def test_cannot_upload_image_to_otheruser_recipe(self):
+        with override_settings(MEDIA_ROOT=self.media_folder):
+            other_user = User.objects.create_user('other', 'other@api.com', 'testpassword')
+            recipe = Recipe.objects.create(name='Recipe1', description='Recipe1', upload_by_user=other_user)
+
+            image = SimpleUploadedFile(name='test_image.jpg', content=open('test_image/food.png', 'rb').read(), content_type='image/png')
+            form_data = {'image': image}
+
+            response = self.client.post(reverse('recipe-image-upload', args=[recipe.id]), form_data, format='multipart')
+            self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_upload_recipe_image(self):
+        with override_settings(MEDIA_ROOT=self.media_folder):
+
+            recipe = Recipe.objects.create(name='Recipe1', description='Recipe1', upload_by_user=self.user)
+
+            image = SimpleUploadedFile(name='test_image.jpg', content=open('test_image/food.png', 'rb').read(), content_type='image/png')
+            form_data = {'image': image}
+            response = self.client.post(reverse('recipe-image-upload', args=[recipe.id]), form_data, format='multipart')
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_delete_image(self):
+        with override_settings(MEDIA_ROOT=self.media_folder):
+
+            recipe = Recipe.objects.create(name='Recipe1', description='Recipe1', upload_by_user=self.user)
+            image = SimpleUploadedFile(name='test_image.jpg', content=open('test_image/food.png', 'rb').read(), content_type='image/png')
+            form_data = {'image': image}
+            response = self.client.post(reverse('recipe-image-upload', args=[recipe.id]), form_data, format='multipart')
+
+            response = self.client.delete(reverse('recipe-image-upload', args=[recipe.id]))
+            self.assertEqual(response.status_code, status.HTTP_200_OK)

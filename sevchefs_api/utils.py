@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.exceptions import NotFound
 from sevchefs_api.models import *
@@ -22,6 +23,20 @@ class RecipeUtils:
         except ObjectDoesNotExist:
             tag = None
         return tag
+
+    def delete_recipe_image(recipe):
+        recipe.image.delete()
+        return True
+
+
+class UserUtils:
+
+    def get_user_or_404(id):
+        try:
+            user = User.objects.get(pk=id)
+        except ObjectDoesNotExist:
+            raise NotFound("Unable to find user with id %s" % id)
+        return user
 
 
 def get_request_body_param(request, param, return_on_error):

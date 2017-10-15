@@ -4,9 +4,12 @@ from sevchefs_api import views
 urlpatterns = [
 
     url(r'api/v1.0/recipe/(?P<pk>[0-9]+)/$', views.RecipeView.as_view(), name="recipe-view"),
+    url(r'api/v1.0/recipe/(?P<rpk>[0-9]+)/ingredient/(?P<ipk>[0-9]+)/$', views.RecipeIngredientView.as_view(), name="recipe-ingredient"),
+
     url(r'api/v1.0/recipe/list/$', views.RecipeListView.as_view(), name="recipe-list-view"),
     url(r'api/v1.0/recipe/upload/$', views.RecipeUploadView.as_view(), name="recipe-upload"),
     url(r'api/v1.0/recipe/comment/(?P<pk>[0-9]+)/$', views.CommentRecipeView.as_view(), name="recipe-comment"),
+    url(r'api/v1.0/recipe/favourite/(?P<pk>[0-9]+)/$', views.FavouriteRecipeView.as_view(), name="recipe-favourite"),
     url(r'api/v1.0/recipe/add/tag/(?P<pk>[0-9]+)/$', views.RecipeAddTagView.as_view(), name="recipe-add-tag"),
     url(r'api/v1.0/recipe/image/upload/(?P<pk>[0-9]+)/$', views.RecipeImageUploadView.as_view(), name="recipe-image-upload"),
 

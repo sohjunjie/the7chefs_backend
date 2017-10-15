@@ -11,19 +11,48 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
-from sevchefs_api.models import Recipe, RecipeTagTable
-from sevchefs_api.serializers import RecipeSerializer, RecipeImageSerializer
+from sevchefs_api.models import Recipe, RecipeTagTable, UserRecipeFavourites, RecipeIngredient
+from sevchefs_api.serializers import RecipeSerializer, RecipeImageSerializer, RecipeIngredientSerializer
 from sevchefs_api.utils import RecipeUtils, UserUtils
 from sevchefs_api.utils import get_request_body_param
 # from rest_framework.decorators import permission_classes
 # @permission_classes((IsAuthenticated, ))
 
 
+# TODO: CREATE TEST
+class FavouriteRecipeView(APIView):
+    def post(self, request, pk):
+        """
+        Login user favourite on a recipe by id
+
+        @return: http status of query
+        @raise HTTP_401_UNAUTHORIZED: user must be login
+        @raise HTTP_404_NOT_FOUND: must be a valid recipe id
+        """
+
+        recipe = RecipeUtils.get_recipe_or_404(pk)
+        userprofile = request.user.userprofile
+        UserRecipeFavourites.objects.create(userprofile=userprofile, recipe=recipe)
+
+        return Response({"success": True}, status=status.HTTP_201_CREATED)
+
+    def delete(self, request, pk):
+        """
+        Login user can unfavourite recipe by id
+        """
+        recipe = RecipeUtils.get_recipe_or_404(pk)
+        userprofile = request.user.userprofile
+        recipe_favouited = UserRecipeFavourites.objects.filter(userprofile=userprofile, recipe=recipe)
+        recipe_favouited.delete()
+
+        return Response({"success": True}, status=status.HTTP_200_OK)
+
+
 class CommentRecipeView(APIView):
 
     def post(self, request, pk):
         """
-        Login user comment on a recipe
+        Login user comment on a recipe by id
 
         @body comment: user comment on the recipe
         @return: http status of query
@@ -41,7 +70,7 @@ class CommentRecipeView(APIView):
 
         RecipeUtils.add_recipe_comments(recipe, comment_user, comment)
 
-        return Response({'data': 'success'}, status=status.HTTP_201_CREATED)
+        return Response({"success": True}, status=status.HTTP_201_CREATED)
 
 
 class RecipeView(APIView):
@@ -118,7 +147,7 @@ class RecipeUploadView(APIView):
                               time_required=recipe_duration,
                               upload_by_user=upload_user)
 
-        return Response({'data': 'success'}, status=status.HTTP_201_CREATED)
+        return Response({"success": True}, status=status.HTTP_201_CREATED)
 
 
 # TODO: TEST
@@ -178,8 +207,38 @@ class RecipeImageUploadView(APIView):
                             status=status.HTTP_401_UNAUTHORIZED)
 
         RecipeUtils.delete_recipe_image(recipe)
-        return Response({'detail': 'deleted'}, status=status.HTTP_200_OK)
+        return Response({"success": True}, status=status.HTTP_200_OK)
 
 
 class RecipeIngredientView(APIView):
-    pass
+    def post(self, request, rpk, ipk):
+        """
+        Add ingredient to recipe
+        """
+        serving_size = get_request_body_param(request, 'serving_size', '').strip()
+        if serving_size == "":
+            return Response({'detail': 'serving size of ingredient must not be empty'}, status=status.HTTP_400_BAD_REQUEST)
+
+        recipe = RecipeUtils.get_recipe_or_404(rpk)
+        if recipe.upload_by_user != request.user:
+            return Response({'detail': 'only creator of recipe can edit the recipe'},
+                            status=status.HTTP_401_UNAUTHORIZED)
+
+        ingredient = RecipeUtils.get_ingredient_or_404(ipk)
+        RecipeIngredient.objects.create(recipe=recipe, ingredient=ingredient, serving_size=serving_size)
+
+        return Response({"success": True}, status=status.HTTP_201_CREATED)
+
+    def delete(self, request, rpk, ipk):
+        """
+        delete ingredient from recipe
+        """
+        recipe = RecipeUtils.get_recipe_or_404(rpk)
+        if recipe.upload_by_user != request.user:
+            return Response({'detail': 'only creator of recipe can edit the recipe'},
+                            status=status.HTTP_401_UNAUTHORIZED)
+
+        ingredient = RecipeUtils.get_ingredient_or_404(ipk)
+        recipe_ingredient = RecipeIngredient.objects.filter(recipe=recipe, ingredient=ingredient).first()
+        recipe_ingredient.delete()
+        return Response({"success": True}, status=status.HTTP_200_OK)

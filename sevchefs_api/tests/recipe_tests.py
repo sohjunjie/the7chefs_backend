@@ -4,7 +4,7 @@ from django.core.urlresolvers import reverse
 import json
 
 from rest_framework import status
-from sevchefs_api.models import Recipe, RecipeTag
+from sevchefs_api.models import Recipe, RecipeTag, UserRecipeFavourites, Ingredient, RecipeIngredient
 from sevchefs_api.tests import base_tests
 
 from tempfile import mkdtemp
@@ -147,6 +147,47 @@ class RecipeTests(base_tests.BaseApiTest):
 
         response = self.client.post(reverse('recipe-add-tag', args=[recipe.id]), json.dumps(recipe_tag_list), 'application/json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_user_favourite_recipe(self):
+        """
+        Ensure user can favourite a recipe
+        """
+        other_user = User.objects.create_user('other', 'other@api.com', 'testpassword')
+        recipe = Recipe.objects.create(name='Recipe1', description='Recipe1', upload_by_user=other_user)
+
+        response = self.client.post(reverse('recipe-favourite', args=[recipe.id]))
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(UserRecipeFavourites.objects.filter(userprofile=self.user.userprofile).count(), 1)
+
+    def test_user_unfavourite_recipe(self):
+        """
+        Ensure user can favourite a recipe
+        """
+        other_user = User.objects.create_user('other', 'other@api.com', 'testpassword')
+        recipe = Recipe.objects.create(name='Recipe1', description='Recipe1', upload_by_user=other_user)
+        UserRecipeFavourites.objects.create(userprofile=self.user.userprofile, recipe=recipe)
+
+        response = self.client.delete(reverse('recipe-favourite', args=[recipe.id]))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(UserRecipeFavourites.objects.filter(userprofile=self.user.userprofile).count(), 0)
+
+    def test_add_ingredient_to_recipe(self):
+        recipe = Recipe.objects.create(name='Recipe1', description='Recipe1', upload_by_user=self.user)
+        ingredient = Ingredient.objects.create(name="onion", description="onion1")
+
+        data = {'serving_size': '100 cubes'}
+
+        response = self.client.post(reverse('recipe-ingredient', args=[recipe.id, ingredient.id]), json.dumps(data), 'application/json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(recipe.ingredients.count(), 1)
+
+    def test_remove_ingredient_from_recipe(self):
+        recipe = Recipe.objects.create(name='Recipe1', description='Recipe1', upload_by_user=self.user)
+        ingredient = Ingredient.objects.create(name="onion", description="onion1")
+        RecipeIngredient.objects.create(recipe=recipe, ingredient=ingredient, serving_size="100 cubes")
+        response = self.client.delete(reverse('recipe-ingredient', args=[recipe.id, ingredient.id]))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(recipe.ingredients.count(), 0)
 
 
 class RecipeImageTest(base_tests.BaseApiTest):

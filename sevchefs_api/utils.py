@@ -14,6 +14,13 @@ class RecipeUtils:
             raise NotFound("Unable to find recipe with id %s" % id)
         return recipe
 
+    def get_ingredient_or_404(id):
+        try:
+            ingredient = Ingredient.objects.get(pk=id)
+        except ObjectDoesNotExist:
+            raise NotFound("Unable to find ingredient with id %s" % id)
+        return ingredient
+
     def add_recipe_comments(recipe, user, comment):
         RecipeComment.objects.create(recipe=recipe, user=user, text=comment)
 

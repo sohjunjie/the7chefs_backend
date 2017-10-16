@@ -106,8 +106,9 @@ class RecipeListView(generics.ListAPIView):
     permission_classes = (AllowAny,)
 
     def list(self, request):
+        print(request.user)
         queryset = self.get_queryset()
-        serializer = RecipeSerializer(queryset, many=True)
+        serializer = RecipeSerializer(queryset, many=True, context={'request': request})
         return Response({'data': serializer.data}, status=status.HTTP_200_OK)
 
 

@@ -1,8 +1,10 @@
+from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.http import Http404
 
 from rest_framework import generics
 from rest_framework import status
+from rest_framework.authtoken.models import Token
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -10,6 +12,35 @@ from rest_framework.views import APIView
 from sevchefs_api.models import UserProfile
 from sevchefs_api.utils import get_request_body_param
 from sevchefs_api.serializers import UserProfileSerializer
+
+import re
+
+
+class ObtainAuthToken(APIView):
+
+    permission_classes = (AllowAny, )
+
+    def post(self, request):
+
+        username = get_request_body_param(request, 'email', '')
+        password = get_request_body_param(request, 'password', '')
+
+        if not (username and password):
+            return Response({"detail": "credentials not entered"}, status.HTTP_400_BAD_REQUEST)
+
+        email_regex_pattern = '^([\w\.]+)@((?:[\w]+\.)+)([a-zA-Z]{2,4})$'
+        if re.search(email_regex_pattern, username) is not None:
+            try:
+                username = User.objects.get(email=username).username
+            except User.DoesNotExist:
+                username = None
+
+        user = authenticate(username=username, password=password)
+        if user is None:
+            return Response({"non_field_errors": ["Unable to log in with provided credentials."]}, status.HTTP_400_BAD_REQUEST)
+
+        token = Token.objects.get(user=user)
+        return Response({"token": token.key}, status.HTTP_200_OK)
 
 
 class UserSignUpView(APIView):

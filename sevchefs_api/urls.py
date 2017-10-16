@@ -3,6 +3,8 @@ from sevchefs_api import views
 
 urlpatterns = [
 
+    url(r'^api/v1.0/login2', views.ObtainAuthToken.as_view(), name="auth-token-view"),
+
     url(r'api/v1.0/recipe/(?P<pk>[0-9]+)/$', views.RecipeView.as_view(), name="recipe-view"),
     url(r'api/v1.0/recipe/(?P<rpk>[0-9]+)/ingredient/(?P<ipk>[0-9]+)/$', views.RecipeIngredientView.as_view(), name="recipe-ingredient"),
 

@@ -7,6 +7,7 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 
 from rest_framework import generics
 from rest_framework import status
+from rest_framework.decorators import permission_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -75,8 +76,7 @@ class CommentRecipeView(APIView):
 
 class RecipeView(APIView):
 
-    permission_classes = (AllowAny, )
-
+    @permission_classes((AllowAny, ))
     def get(self, request, pk):
         """
         View recipe details by id
@@ -84,6 +84,39 @@ class RecipeView(APIView):
         recipe = RecipeUtils.get_recipe_or_404(pk)
         serializer = RecipeSerializer(recipe)
         return Response({'data': serializer.data}, status=status.HTTP_200_OK)
+
+    def put(self, request, pk):
+
+        recipe = RecipeUtils.get_recipe_or_404(pk)
+
+        if recipe.upload_by_user != request.user:
+            return Response({'detail': 'only creator of recipe can add tag to recipe'},
+                            status=status.HTTP_401_UNAUTHORIZED)
+
+        r_name = get_request_body_param(request, 'name', None)
+        r_desc = get_request_body_param(request, 'description', None)
+        r_diff_level = get_request_body_param(request, 'difficulty_level', None)
+        r_dur_min = get_request_body_param(request, 'duration_minute', None)
+        r_dur_hour = get_request_body_param(request, 'duration_hour', None)
+
+        if r_name is not None:
+            recipe.name = r_name
+
+        if r_desc is not None:
+            recipe.description = r_desc
+
+        if r_diff_level is not None:
+            recipe.difficulty_level = r_diff_level
+
+        if((r_dur_min is not None) and (r_dur_hour is not None)):
+            if r_dur_min is not None:
+                recipe_duration = timedelta(minutes=r_dur_min)
+            if r_dur_hour is not None:
+                recipe_duration += timedelta(hours=r_dur_hour)
+            recipe.time_required = recipe_duration
+
+        recipe.save()
+        return Response({'success': True}, status=status.HTTP_200_OK)
 
 
 class UserRecipeListView(generics.ListAPIView):

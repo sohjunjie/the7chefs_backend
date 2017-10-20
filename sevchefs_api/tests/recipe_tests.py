@@ -1,3 +1,4 @@
+from datetime import timedelta
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 
@@ -103,6 +104,18 @@ class RecipeTests(base_tests.BaseApiTest):
         response = self.client.get(reverse('recipe-view', args=[recipe.id]))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertContains(response, 'Recipe1')
+
+    def test_edit_recipe(self):
+
+        recipe = Recipe.objects.create(name='Recipe1', description='Recipe1', upload_by_user=self.user)
+
+        data = {'name': 'recipe2', 'description': 'new desc', 'duration_minute': 30, 'duration_hour': 1}
+        response = self.client.put(reverse('recipe-view', args=[recipe.id]), json.dumps(data), 'application/json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        newrecipe = Recipe.objects.get(pk=recipe.id)
+        self.assertEqual(newrecipe.name, 'recipe2')
+        self.assertEqual(newrecipe.description, 'new desc')
+        self.assertEqual(newrecipe.time_required, timedelta(hours=1, minutes=30))
 
     def test_login_user_can_create_new_recipe(self):
         """

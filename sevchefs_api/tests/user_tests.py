@@ -1,13 +1,28 @@
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-
 import json
 
 from rest_framework import status
+from rest_framework.authtoken.models import Token
+
 from sevchefs_api.tests import base_tests
 
 
 class UserTests(base_tests.BaseGuestUser):
+    def test_guest_auth_token_w_email_and_password(self):
+        """
+        Ensure able to get auth token by email and password
+        """
+        superuser = User.objects.create_superuser('test', 'test@api.com', 'testpassword')
+        token = Token.objects.get(user=superuser)
+
+        logindata = {'email': 'test@api.com',
+                     'password': 'testpassword'}
+
+        response = self.client.post(reverse('auth-token-view'), json.dumps(logindata), 'application/json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertContains(response, token.key)
+
     def test_guest_user_sign_up_ok(self):
         """
         Ensure guest user can sign up

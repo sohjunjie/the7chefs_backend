@@ -52,12 +52,12 @@ class RecipeSerializer(serializers.ModelSerializer):
             user = request.user
 
         if user is None or user.is_anonymous():
-            return 'False'
+            return False
 
         if not user.userprofile.favourited_recipes.filter(id=recipe.id).exists():
-            return 'False'
+            return False
 
-        return 'True'
+        return True
 
 
 class UserProfileSerializer(serializers.ModelSerializer):

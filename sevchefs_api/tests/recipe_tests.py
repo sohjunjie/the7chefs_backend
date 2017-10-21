@@ -5,7 +5,8 @@ from django.core.urlresolvers import reverse
 import json
 
 from rest_framework import status
-from sevchefs_api.models import Recipe, RecipeTag, UserRecipeFavourites, Ingredient, RecipeIngredient
+from sevchefs_api.models import Recipe, RecipeTag, UserRecipeFavourites, \
+    Ingredient, RecipeIngredient, RecipeInstruction
 from sevchefs_api.tests import base_tests
 
 from tempfile import mkdtemp
@@ -109,13 +110,12 @@ class RecipeTests(base_tests.BaseApiTest):
 
         recipe = Recipe.objects.create(name='Recipe1', description='Recipe1', upload_by_user=self.user)
 
-        data = {'name': 'recipe2', 'description': 'new desc', 'duration_minute': 30, 'duration_hour': 1}
+        data = {'name': 'recipe2', 'description': 'new desc'}
         response = self.client.put(reverse('recipe-view', args=[recipe.id]), json.dumps(data), 'application/json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         newrecipe = Recipe.objects.get(pk=recipe.id)
         self.assertEqual(newrecipe.name, 'recipe2')
         self.assertEqual(newrecipe.description, 'new desc')
-        self.assertEqual(newrecipe.time_required, timedelta(hours=1, minutes=30))
 
     def test_login_user_can_create_new_recipe(self):
         """
@@ -203,6 +203,17 @@ class RecipeTests(base_tests.BaseApiTest):
         self.assertEqual(recipe.ingredients.count(), 0)
 
 
+class RecipeInstructionTest(base_tests.BaseApiTest):
+
+    def test_create_recipe_instruction(self):
+        recipe = Recipe.objects.create(name='Recipe1', description='Recipe1', upload_by_user=self.user)
+
+        data = {'recipe_id': recipe.id, 'step_num': 1, 'instruction': "instru1", 'duration_minute': 10, 'duration_hour': 0}
+        response = self.client.post(reverse('recipe-instruction-view'), json.dumps(data), 'application/json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(RecipeInstruction.objects.filter(recipe=recipe).exists())
+
+
 class RecipeImageTest(base_tests.BaseApiTest):
 
     def setUp(self):
@@ -244,3 +255,14 @@ class RecipeImageTest(base_tests.BaseApiTest):
 
             response = self.client.delete(reverse('recipe-image-upload', args=[recipe.id]))
             self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_upload_recipe_instruction_image(self):
+        with override_settings(MEDIA_ROOT=self.media_folder):
+
+            recipe = Recipe.objects.create(name='Recipe1', description='Recipe1', upload_by_user=self.user)
+            recipe_instruction = RecipeInstruction.objects.create(recipe=recipe, step_num=1, instruction="test")
+
+            image = SimpleUploadedFile(name='test_image.jpg', content=open('test_image/food.png', 'rb').read(), content_type='image/png')
+            form_data = {'image': image}
+            response = self.client.post(reverse('recipe-instruction-image-upload', args=[recipe_instruction.id]), form_data, format='multipart')
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED)

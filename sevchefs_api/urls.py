@@ -15,6 +15,9 @@ urlpatterns = [
     url(r'api/v1.0/recipe/add/tag/(?P<pk>[0-9]+)/$', views.RecipeAddTagView.as_view(), name="recipe-add-tag"),
     url(r'api/v1.0/recipe/image/upload/(?P<pk>[0-9]+)/$', views.RecipeImageUploadView.as_view(), name="recipe-image-upload"),
 
+    url(r'api/v1.0/recipe/instruction/$', views.RecipeInstructionView.as_view(), name="recipe-instruction-view"),
+    url(r'api/v1.0/recipe/instruction/image/upload/(?P<pk>[0-9]+)/$', views.RecipeInstructionImageView.as_view(), name="recipe-instruction-image-upload"),
+
     url(r'api/v1.0/user/(?P<pk>[0-9]+)/recipe/list/$', views.UserRecipeListView.as_view(), name="user-recipe-list"),
 
     url(r'api/v1.0/user/signup/$', views.UserSignUpView.as_view(), name="user-signup"),

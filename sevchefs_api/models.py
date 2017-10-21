@@ -55,7 +55,6 @@ class Recipe(models.Model):
     upload_by_user = models.ForeignKey(User, related_name='recipes')
     image = models.ImageField(upload_to=recipe_image_directory_path, blank=True, null=True)
     difficulty_level = models.IntegerField(default=0)
-    time_required = models.DurationField(null=True)
     ingredients = models.ManyToManyField(
         'Ingredient',
         through='RecipeIngredient',
@@ -102,6 +101,7 @@ class RecipeInstruction(models.Model):
     recipe = models.ForeignKey(Recipe, related_name='instructions')
     step_num = models.IntegerField(default=1)
     instruction = models.TextField(max_length=140, null=False, blank=False)
+    time_required = models.DurationField(null=True)
     image = models.ImageField(upload_to=recipe_instruction_image_directory_path, blank=True, null=True)
 
 

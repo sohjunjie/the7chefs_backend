@@ -2,6 +2,8 @@ from django.contrib.auth.models import User
 from rest_framework import serializers
 from sevchefs_api.models import *
 
+from datetime import timedelta
+
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -29,12 +31,18 @@ class RecipeSerializer(serializers.ModelSerializer):
     image_url = serializers.SerializerMethodField()
     ingredients = RecipeIngredientSerializer(many=True)
     is_favourited = serializers.SerializerMethodField()
+    time_required = serializers.SerializerMethodField()
 
     class Meta:
         model = Recipe
         fields = ('id', 'name', 'description', 'upload_by_user', 'difficulty_level',
                   'time_required', 'upload_datetime', 'image_url', 'ingredients',
                   'is_favourited')
+
+    def get_time_required(self, recipe):
+        return_time_required = timedelta(0)
+        for instr in recipe.instructions.all():
+            return_time_required += instr.time_required
 
     def get_image_url(self, recipe):
 
@@ -81,4 +89,10 @@ class UserProfileSerializer(serializers.ModelSerializer):
 class RecipeImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
+        fields = ('image', )
+
+
+class RecipeInstructionImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RecipeInstruction
         fields = ('image', )

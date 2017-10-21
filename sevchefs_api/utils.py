@@ -1,7 +1,9 @@
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.exceptions import NotFound
+from sevchefs_api.exceptions import NotAuthorized
 from sevchefs_api.models import *
+
 import json
 
 
@@ -13,6 +15,13 @@ class RecipeUtils:
         except ObjectDoesNotExist:
             raise NotFound("Unable to find recipe with id %s" % id)
         return recipe
+
+    def get_recipe_instruction_or_404(id):
+        try:
+            recipeInstruction = RecipeInstruction.objects.get(pk=id)
+        except ObjectDoesNotExist:
+            raise NotFound("Unable to find recipe instruction with id %s" % id)
+        return recipeInstruction
 
     def get_ingredient_or_404(id):
         try:
@@ -34,6 +43,14 @@ class RecipeUtils:
     def delete_recipe_image(recipe):
         recipe.image.delete()
         return True
+
+    def delete_recipe_instruction_image(recipe_instruction):
+        recipe_instruction.image.delete()
+        return True
+
+    def raise_401_if_recipe_not_belong_user(recipe, request):
+        if recipe.upload_by_user != request.user:
+            raise NotAuthorized('only creator of recipe can edit')
 
 
 class UserUtils:

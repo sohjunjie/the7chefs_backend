@@ -43,6 +43,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         return_time_required = timedelta(0)
         for instr in recipe.instructions.all():
             return_time_required += instr.time_required
+        return return_time_required
 
     def get_image_url(self, recipe):
 

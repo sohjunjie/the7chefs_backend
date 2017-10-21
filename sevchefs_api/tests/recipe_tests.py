@@ -213,6 +213,15 @@ class RecipeInstructionTest(base_tests.BaseApiTest):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertTrue(RecipeInstruction.objects.filter(recipe=recipe).exists())
 
+    def test_instruction_timerequired_reflected_in_recipe(self):
+        recipe = Recipe.objects.create(name='Recipe1', description='Recipe1', upload_by_user=self.user)
+        repInstr = RecipeInstruction.objects.create(recipe=recipe, step_num=1, instruction="test", time_required=timedelta(minutes=10))
+        repInstr2 = RecipeInstruction.objects.create(recipe=recipe, step_num=2, instruction="test", time_required=timedelta(minutes=5))
+
+        response = self.client.get(reverse('recipe-view', args=[recipe.id]))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertContains(response, str(timedelta(minutes=15)))
+
 
 class RecipeImageTest(base_tests.BaseApiTest):
 

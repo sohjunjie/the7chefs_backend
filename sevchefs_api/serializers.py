@@ -12,9 +12,19 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class IngredientSerializer(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField()
+
     class Meta:
         model = Ingredient
-        fields = ('name', 'description')
+        fields = ('name', 'description', 'image_url')
+
+    def get_image_url(self, ingredient):
+
+        if not ingredient.image:
+            return None
+
+        image_url = ingredient.image.url
+        return image_url
 
 
 class RecipeIngredientSerializer(serializers.ModelSerializer):

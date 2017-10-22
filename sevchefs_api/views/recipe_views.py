@@ -160,11 +160,11 @@ class RecipeUploadView(APIView):
 
         upload_user = request.user
 
-        Recipe.objects.create(name=recipe_name, description=recipe_desc,
-                              difficulty_level=recipe_diff,
-                              upload_by_user=upload_user)
+        recipe = Recipe.objects.create(name=recipe_name, description=recipe_desc,
+                                       difficulty_level=recipe_diff,
+                                       upload_by_user=upload_user)
 
-        return Response({"success": True}, status=status.HTTP_201_CREATED)
+        return Response({"success": True, "recipe_id": recipe.id}, status=status.HTTP_201_CREATED)
 
 
 # TODO: TEST

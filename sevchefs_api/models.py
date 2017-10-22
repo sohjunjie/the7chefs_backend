@@ -18,7 +18,7 @@ def recipe_image_directory_path(instance, filename):
 def ingredient_image_directory_path(instance, filename):
     ext = filename.split('.')[-1]
     filename = "%s.%s" % (uuid.uuid4(), ext)
-    return 'ingredient/{0}/{1}'.format(instance.id, filename)
+    return 'ingredient/{0}'.format(filename)
 
 
 def recipe_instruction_image_directory_path(instance, filename):

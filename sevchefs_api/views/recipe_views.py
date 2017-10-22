@@ -239,8 +239,8 @@ class RecipeInstructionView(APIView):
         r_dur_hour = int(r_dur_hour) if isinstance(r_dur_hour, int) else 0
         r_duration = timedelta(hours=r_dur_hour, minutes=r_dur_min)
 
-        RecipeInstruction.objects.create(recipe=recipe, step_num=r_step_num, instruction=r_instr_text, time_required=r_duration)
-        return Response({"success": True}, status=status.HTTP_201_CREATED)
+        ri = RecipeInstruction.objects.create(recipe=recipe, step_num=r_step_num, instruction=r_instr_text, time_required=r_duration)
+        return Response({"success": True, "instruction_id": ri.id}, status=status.HTTP_201_CREATED)
 
     def delete(self, request):
         pass

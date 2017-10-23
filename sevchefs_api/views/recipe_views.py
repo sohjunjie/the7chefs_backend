@@ -19,11 +19,20 @@ from sevchefs_api.serializers import RecipeSerializer, RecipeImageSerializer, \
 
 from sevchefs_api.utils import RecipeUtils, UserUtils
 from sevchefs_api.utils import get_request_body_param
-# from rest_framework.decorators import permission_classes
-# @permission_classes((IsAuthenticated, ))
 
 
-# TODO: CREATE TEST
+class FavouritedRecipeListView(generics.ListAPIView):
+
+    serializer_class = RecipeSerializer
+
+    @permission_classes((IsAuthenticated, ))
+    def list(self, request):
+        user = request.user
+        fav_recipes = user.userprofile.favourited_recipes.all()
+        serializer = RecipeSerializer(fav_recipes, many=True, context={'request': request})
+        return Response({'data': serializer.data}, status=status.HTTP_200_OK)
+
+
 class FavouriteRecipeView(APIView):
     def post(self, request, pk):
         """

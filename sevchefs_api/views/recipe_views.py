@@ -212,6 +212,8 @@ class RecipeImageUploadView(APIView):
         recipe = RecipeUtils.get_recipe_or_404(pk)
         RecipeUtils.raise_401_if_recipe_not_belong_user(recipe, request)
 
+        print(request.body)
+
         serializer = RecipeImageSerializer(recipe, data=request.data)
         if serializer.is_valid():
             RecipeUtils.delete_recipe_image(recipe)

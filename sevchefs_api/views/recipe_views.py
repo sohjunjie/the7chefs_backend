@@ -1,6 +1,9 @@
 from datetime import timedelta
 
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
+from django.db.models import F
+
 from django.shortcuts import render
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
@@ -157,8 +160,6 @@ class RecipeUploadView(APIView):
         recipe_name = get_request_body_param(request, 'name', '').strip()
         recipe_desc = get_request_body_param(request, 'description', '').strip()
         recipe_diff = get_request_body_param(request, 'difficulty', 0)
-        # duration_minute = get_request_body_param(request, 'duration_minute', 0)
-        # duration_hour = get_request_body_param(request, 'duration_hour', 0)
 
         if recipe_name == "":
             return Response({'detail': 'recipe name must not be empty'}, status=status.HTTP_400_BAD_REQUEST)
@@ -254,7 +255,17 @@ class RecipeInstructionView(APIView):
         return Response({"success": True, "instruction_id": ri.id}, status=status.HTTP_201_CREATED)
 
     def delete(self, request):
-        pass
+        r_id = get_request_body_param(request, 'recipe_id', None)
+        r_instr_id = get_request_body_param(request, 'instruction_id', 0)
+
+        recipe = RecipeUtils.get_recipe_or_404(r_id)
+        instr = get_recipe_instruction_or_404(r_instr_id)
+
+        affected_instr_step = recipe.instructions.filter(step_num__gt=instr.step_num)
+        instr.delete()
+
+        with transaction.atomic():
+            affected_instr_step.update(step_num=F('step_num') - 1)
 
 
 class RecipeInstructionImageView(APIView):

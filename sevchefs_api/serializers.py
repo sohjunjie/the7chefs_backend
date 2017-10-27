@@ -5,6 +5,21 @@ from sevchefs_api.models import *
 from datetime import timedelta
 
 
+class RecipeInstructionSerializer(serializers.ModelSerializer):
+
+    image_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = RecipeInstruction
+        fields = ('recipe', 'step_num', 'instruction', 'time_required', 'image_url')
+
+    def get_image_url(self, instr):
+        if not instr.image:
+            return None
+        image_url = instr.image.url
+        return image_url
+
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -42,12 +57,13 @@ class RecipeSerializer(serializers.ModelSerializer):
     ingredients = RecipeIngredientSerializer(many=True)
     is_favourited = serializers.SerializerMethodField()
     time_required = serializers.SerializerMethodField()
+    instructions = RecipeInstructionSerializer(many=True)
 
     class Meta:
         model = Recipe
         fields = ('id', 'name', 'description', 'upload_by_user', 'difficulty_level',
                   'time_required', 'upload_datetime', 'image_url', 'ingredients',
-                  'is_favourited')
+                  'is_favourited', 'instructions')
 
     def get_time_required(self, recipe):
         return_time_required = timedelta(0)

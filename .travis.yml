@@ -6,4 +6,17 @@ python:
 install:
   - pip install -r requirements.txt
 
+before_script:
+- psql -c 'create database the7chefs;' -U the7chefsapp
+- python manage.py migrate
+
 script: python manage.py test
+
+services:
+  - postgresql
+
+postgres:
+  adapter: postgresql
+  database: the7chefs
+  username: the7chefsapp
+  password: qwe123qwe123

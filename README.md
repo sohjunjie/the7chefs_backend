@@ -1,3 +1,5 @@
+[![codecov](https://codecov.io/gh/sohjunjie/the7chefs_backend/branch/master/graph/badge.svg?token=Yc1VJMeHV9)](https://codecov.io/gh/sohjunjie/the7chefs_backend)
+
 # the7chefs backend
 
 Link to our [frontend](https://github.com/sohjunjie/the7chefs_frontend.git) code.

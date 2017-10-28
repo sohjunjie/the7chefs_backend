@@ -13,18 +13,10 @@ before_script:
 - psql -c 'GRANT ALL PRIVILEGES ON DATABASE the7chefs TO the7chefsapp;' -U postgres
 - python manage.py migrate
 
-# ALTER ROLE the7chefsapp SET client_encoding TO 'utf8';
-# ALTER ROLE the7chefsapp SET default_transaction_isolation TO 'read committed';
-# ALTER ROLE the7chefsapp SET timezone TO 'UTC';
-
-
 script: python manage.py test
 
 services:
   - postgresql
 
-postgres:
-  adapter: postgresql
-  database: the7chefs
-  username: the7chefsapp
-  password: qwe123qwe123
+after_success:
+  - codecov

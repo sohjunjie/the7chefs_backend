@@ -1,8 +1,7 @@
+# the7chefs backend
 [![Build Status](https://travis-ci.com/sohjunjie/the7chefs_backend.svg?token=LXXhF4G1qzyd5KGfrSyR&branch=master)](https://travis-ci.com/sohjunjie/the7chefs_backend) [![codecov](https://codecov.io/gh/sohjunjie/the7chefs_backend/branch/master/graph/badge.svg?token=Yc1VJMeHV9)](https://codecov.io/gh/sohjunjie/the7chefs_backend)
 
-# the7chefs backend
-
-Link to our [frontend](https://github.com/hoohoo-b/CookTasty) code.
+*the7chefs_backend* is a provider of RESTful backend services for the mobile application [CookTasty](https://github.com/hoohoo-b/CookTasty).
 
 
 ## Quick start (backend)

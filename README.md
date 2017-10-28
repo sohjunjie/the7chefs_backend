@@ -2,7 +2,7 @@
 
 # the7chefs backend
 
-Link to our [frontend](https://github.com/sohjunjie/the7chefs_frontend.git) code.
+Link to our [frontend](https://github.com/hoohoo-b/CookTasty) code.
 
 
 ## Quick start (backend)

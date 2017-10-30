@@ -6,11 +6,12 @@ from sevchefs_api.serializers import IngredientSerializer
 
 
 class IngredientListView(generics.ListAPIView):
-    queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     permission_classes = (AllowAny,)
 
-    def list(self, request):
-        queryset = self.get_queryset()
-        serializer = IngredientSerializer(queryset, many=True)
-        return Response({'data': serializer.data}, status=status.HTTP_200_OK)
+    def get_queryset(self):
+        ingredient_list = Ingredient.objects.all()
+        return ingredient_list
+
+    def get_serializer_context(self):
+        return {'request': self.request}

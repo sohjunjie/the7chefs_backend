@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.db.models import F
@@ -27,13 +28,14 @@ from sevchefs_api.utils import get_request_body_param
 class FavouritedRecipeListView(generics.ListAPIView):
 
     serializer_class = RecipeSerializer
+    permission_classes = (IsAuthenticated, )
 
-    @permission_classes((IsAuthenticated, ))
-    def list(self, request):
-        user = request.user
-        fav_recipes = user.userprofile.favourited_recipes.all()
-        serializer = RecipeSerializer(fav_recipes, many=True, context={'request': request})
-        return Response({'data': serializer.data}, status=status.HTTP_200_OK)
+    def get_queryset(self):
+        fav_recipes = self.request.user.userprofile.favourited_recipes.all()
+        return fav_recipes
+
+    def get_serializer_context(self):
+        return {'request': self.request}
 
 
 class FavouriteRecipeView(APIView):
@@ -127,24 +129,27 @@ class UserRecipeListView(generics.ListAPIView):
     serializer_class = RecipeSerializer
     permission_classes = (AllowAny,)
 
-    def list(self, request, pk):
-        user = UserUtils.get_user_or_404(pk)
-        recipes = self.get_queryset()
-        recipes = recipes.filter(upload_by_user=user)
-        serializer = RecipeSerializer(recipes, many=True)
-        return Response({'data': serializer.data}, status=status.HTTP_200_OK)
+    def get_queryset(self):
+        user_pk = self.kwargs['pk']
+        user = UserUtils.get_user_or_404(user_pk)
+        recipes = Recipe.objects.filter(upload_by_user=user)
+        return recipes
+
+    def get_serializer_context(self):
+        return {'request': self.request}
 
 
-# TODO: ADD IN API DOCS
 class RecipeListView(generics.ListAPIView):
-    queryset = Recipe.objects.all()
+    queryset = None
     serializer_class = RecipeSerializer
     permission_classes = (AllowAny,)
 
-    def list(self, request):
-        queryset = self.get_queryset()
-        serializer = RecipeSerializer(queryset, many=True, context={'request': request})
-        return Response({'data': serializer.data}, status=status.HTTP_200_OK)
+    def get_queryset(self):
+        queryset = Recipe.objects.all()
+        return queryset
+
+    def get_serializer_context(self):
+        return {'request': self.request}
 
 
 class RecipeUploadView(APIView):

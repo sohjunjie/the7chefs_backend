@@ -11,7 +11,7 @@ class RecipeInstructionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RecipeInstruction
-        fields = ('recipe', 'step_num', 'instruction', 'time_required', 'image_url')
+        fields = ('step_num', 'instruction', 'time_required', 'image_url')
 
     def get_image_url(self, instr):
         if not instr.image:

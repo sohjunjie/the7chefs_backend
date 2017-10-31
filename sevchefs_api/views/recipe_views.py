@@ -93,7 +93,8 @@ class CommentRecipeView(APIView):
 
 class RecipeView(APIView):
 
-    @permission_classes((AllowAny, ))
+    permission_classes = (AllowAny,)
+
     def get(self, request, pk):
         """
         View recipe details by id
@@ -101,6 +102,9 @@ class RecipeView(APIView):
         recipe = RecipeUtils.get_recipe_or_404(pk)
         serializer = RecipeSerializer(recipe)
         return Response({'data': serializer.data}, status=status.HTTP_200_OK)
+
+
+class RecipeEditView(APIView):
 
     def put(self, request, pk):
 

@@ -111,7 +111,7 @@ class RecipeTests(base_tests.BaseApiTest):
         recipe = Recipe.objects.create(name='Recipe1', description='Recipe1', upload_by_user=self.user)
 
         data = {'name': 'recipe2', 'description': 'new desc'}
-        response = self.client.put(reverse('recipe-view', args=[recipe.id]), json.dumps(data), 'application/json')
+        response = self.client.put(reverse('recipe-edit-view', args=[recipe.id]), json.dumps(data), 'application/json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         newrecipe = Recipe.objects.get(pk=recipe.id)
         self.assertEqual(newrecipe.name, 'recipe2')

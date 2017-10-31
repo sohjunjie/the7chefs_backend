@@ -91,7 +91,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
     ],
     'TEST_REQUEST_DEFAULT_FORMAT': 'json',
-    'PAGE_SIZE': 20
+    'PAGE_SIZE': 10
 }
 
 ROOT_URLCONF = 'the7chefs.urls'

@@ -264,13 +264,14 @@ class RecipeInstructionView(APIView):
         r_instr_id = get_request_body_param(request, 'instruction_id', 0)
 
         recipe = RecipeUtils.get_recipe_or_404(r_id)
-        instr = get_recipe_instruction_or_404(r_instr_id)
+        instr = RecipeUtils.get_recipe_instruction_or_404(r_instr_id)
 
         affected_instr_step = recipe.instructions.filter(step_num__gt=instr.step_num)
-        instr.delete()
 
-        with transaction.atomic():
-            affected_instr_step.update(step_num=F('step_num') - 1)
+        instr.delete()
+        affected_instr_step.update(step_num=F('step_num') - 1)
+
+        return Response({"success": True}, status=status.HTTP_200_OK)
 
 
 class RecipeInstructionImageView(APIView):

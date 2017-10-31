@@ -213,6 +213,22 @@ class RecipeInstructionTest(base_tests.BaseApiTest):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertTrue(RecipeInstruction.objects.filter(recipe=recipe).exists())
 
+    def test_create_recipe_instruction_neg_stepnum_invalid(self):
+        recipe = Recipe.objects.create(name='Recipe1', description='Recipe1', upload_by_user=self.user)
+
+        data = {'recipe_id': recipe.id, 'step_num': -1, 'instruction': "instru1", 'duration_minute': 10, 'duration_hour': 0}
+        response = self.client.post(reverse('recipe-instruction-view'), json.dumps(data), 'application/json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertFalse(RecipeInstruction.objects.filter(recipe=recipe).exists())
+
+    def test_create_recipe_instruction_wo_instruction_invalid(self):
+        recipe = Recipe.objects.create(name='Recipe1', description='Recipe1', upload_by_user=self.user)
+
+        data = {'recipe_id': recipe.id, 'step_num': 1, 'instruction': "", 'duration_minute': 10, 'duration_hour': 0}
+        response = self.client.post(reverse('recipe-instruction-view'), json.dumps(data), 'application/json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertFalse(RecipeInstruction.objects.filter(recipe=recipe).exists())
+
     def test_instruction_timerequired_reflected_in_recipe(self):
         recipe = Recipe.objects.create(name='Recipe1', description='Recipe1', upload_by_user=self.user)
         repInstr = RecipeInstruction.objects.create(recipe=recipe, step_num=1, instruction="test", time_required=timedelta(minutes=10))
@@ -221,6 +237,18 @@ class RecipeInstructionTest(base_tests.BaseApiTest):
         response = self.client.get(reverse('recipe-view', args=[recipe.id]))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertContains(response, str(timedelta(minutes=15)))
+
+    def test_delete_recipe_instruction_also_decrement_affected_instruction_stepnum(self):
+        recipe = Recipe.objects.create(name='Recipe1', description='Recipe1', upload_by_user=self.user)
+        repInstr = RecipeInstruction.objects.create(recipe=recipe, step_num=1, instruction="test1", time_required=timedelta(minutes=10))
+        repInstr2 = RecipeInstruction.objects.create(recipe=recipe, step_num=2, instruction="test2", time_required=timedelta(minutes=5))
+
+        data = {'recipe_id': recipe.id, 'instruction_id': repInstr.id}
+        response = self.client.delete(reverse('recipe-instruction-view'), json.dumps(data), 'application/json')
+        updatedRepInstr2 = RecipeInstruction.objects.get(pk=repInstr2.id)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(updatedRepInstr2.step_num, 1)
+        self.assertFalse(RecipeInstruction.objects.filter(pk=repInstr.id).exists())
 
 
 class RecipeImageTest(base_tests.BaseApiTest):

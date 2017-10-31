@@ -23,6 +23,26 @@ class UserTests(base_tests.BaseGuestUser):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertContains(response, token.key)
 
+    def test_guest_auth_token_does_not_exist(self):
+        """
+        Ensure able to get auth token by email and password
+        """
+
+        logindata = {'email': 'test@api.com',
+                     'password': 'testpassword'}
+
+        response = self.client.post(reverse('auth-token-view'), json.dumps(logindata), 'application/json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_guest_auth_token_send_wo_username_password(self):
+        """
+        Ensure able to get auth token by email and password
+        """
+
+        logindata = {'email': '', 'password': ''}
+        response = self.client.post(reverse('auth-token-view'), json.dumps(logindata), 'application/json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
     def test_guest_user_sign_up_ok(self):
         """
         Ensure guest user can sign up

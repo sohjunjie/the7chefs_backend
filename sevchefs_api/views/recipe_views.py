@@ -100,7 +100,7 @@ class RecipeView(APIView):
         View recipe details by id
         """
         recipe = RecipeUtils.get_recipe_or_404(pk)
-        serializer = RecipeSerializer(recipe)
+        serializer = RecipeSerializer(recipe, context={'request': self.request})
         return Response({'data': serializer.data}, status=status.HTTP_200_OK)
 
 

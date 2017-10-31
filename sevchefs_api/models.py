@@ -55,7 +55,7 @@ class Recipe(models.Model):
     upload_by_user = models.ForeignKey(User, related_name='recipes')
     image = models.ImageField(upload_to=recipe_image_directory_path, blank=True, null=True)
     difficulty_level = models.IntegerField(default=0)
-    ingredients = models.ManyToManyField(
+    ingredients_list = models.ManyToManyField(
         'Ingredient',
         through='RecipeIngredient',
         through_fields=('recipe', 'ingredient'),
@@ -112,7 +112,7 @@ class Ingredient(models.Model):
 
 
 class RecipeIngredient(models.Model):
-    recipe = models.ForeignKey(Recipe)
+    recipe = models.ForeignKey(Recipe, related_name="ingredients")
     ingredient = models.ForeignKey(Ingredient)
     serving_size = models.TextField()
 

@@ -31,7 +31,7 @@ class IngredientSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Ingredient
-        fields = ('id', 'name', 'description', 'image_url')
+        fields = ('id', 'name', 'image_url')
 
     def get_image_url(self, ingredient):
 
@@ -48,7 +48,7 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RecipeIngredient
-        fields = ('recipe', 'ingredient', 'serving_size')
+        fields = ('ingredient', 'serving_size')
 
 
 class RecipeSerializer(serializers.ModelSerializer):

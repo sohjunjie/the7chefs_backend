@@ -6,6 +6,7 @@ from rest_framework import status
 from rest_framework.authtoken.models import Token
 
 from sevchefs_api.tests import base_tests
+from sevchefs_api.models import ActivityTimeline
 
 
 class UserTests(base_tests.BaseGuestUser):
@@ -113,6 +114,7 @@ class FollowUnfollowApiTest(base_tests.BaseApiTest):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertTrue(self.user.userprofile.follows.filter(pk=userOne.userprofile.user_id).exists())
         self.assertTrue(self.user.userprofile.follows.filter(pk=userTwo.userprofile.user_id).exists())
+        self.assertEqual(ActivityTimeline.objects.count(), 2)
 
     def test_unfollow_user_success(self):
         """

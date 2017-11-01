@@ -9,7 +9,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from sevchefs_api.models import UserProfile
+from sevchefs_api.models import UserProfile, ActivityTimeline
 from sevchefs_api.utils import get_request_body_param
 from sevchefs_api.serializers import UserProfileSerializer
 
@@ -100,6 +100,11 @@ class FollowUserView(APIView):
         to_follow_userprofile = self.get_userprofile(pk)
         try:
             current_userprofile.follows.add(pk)
+            ActivityTimeline.objects.create(user=request.user,
+                                            target_user=to_follow_userprofile.user,
+                                            main_object_image=current_userprofile.avatar,
+                                            target_object_image=to_follow_userprofile.avatar,
+                                            summary_text="{0} followed {1} on CookTasty")
         except:
             return self.response_with_400("Already followed user")
         return Response({"success": True}, status=status.HTTP_201_CREATED)

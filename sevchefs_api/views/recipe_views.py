@@ -17,7 +17,7 @@ from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from sevchefs_api.models import Recipe, RecipeTagTable, UserRecipeFavourites, \
-    RecipeIngredient, RecipeInstruction
+    RecipeIngredient, RecipeInstruction, ActivityTimeline
 from sevchefs_api.serializers import RecipeSerializer, RecipeImageSerializer, \
     RecipeIngredientSerializer, RecipeInstructionImageSerializer
 
@@ -51,6 +51,12 @@ class FavouriteRecipeView(APIView):
         recipe = RecipeUtils.get_recipe_or_404(pk)
         userprofile = request.user.userprofile
         UserRecipeFavourites.objects.create(userprofile=userprofile, recipe=recipe)
+
+        ActivityTimeline.objects.create(user=request.user,
+                                        target_user=recipe.upload_by_user,
+                                        main_object_image=userprofile.avatar,
+                                        target_object_image=recipe.image,
+                                        summary_text="{0} favourited {1} recipe")
 
         return Response({"success": True}, status=status.HTTP_201_CREATED)
 
@@ -87,6 +93,12 @@ class CommentRecipeView(APIView):
         comment_user = request.user
 
         RecipeUtils.add_recipe_comments(recipe, comment_user, comment)
+
+        ActivityTimeline.objects.create(user=comment_user,
+                                        target_user=recipe.upload_by_user,
+                                        main_object_image=comment_user.userprofile.avatar,
+                                        target_object_image=recipe.image,
+                                        summary_text="{0} commented on {1} recipe")
 
         return Response({"success": True}, status=status.HTTP_201_CREATED)
 

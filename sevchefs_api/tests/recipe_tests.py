@@ -6,7 +6,7 @@ import json
 
 from rest_framework import status
 from sevchefs_api.models import Recipe, RecipeTag, UserRecipeFavourites, \
-    Ingredient, RecipeIngredient, RecipeInstruction
+    Ingredient, RecipeIngredient, RecipeInstruction, ActivityTimeline
 from sevchefs_api.tests import base_tests
 
 from tempfile import mkdtemp
@@ -73,8 +73,8 @@ class RecipeTests(base_tests.BaseApiTest):
 
         comment = {'comment': 'my comment'}
         response = self.client.post(reverse('recipe-comment', args=[recipe.id]), json.dumps(comment), 'application/json')
-
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(ActivityTimeline.objects.count(), 1)
 
     def test_comment_non_exist_recipe_return_404(self):
         """

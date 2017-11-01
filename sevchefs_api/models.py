@@ -48,6 +48,39 @@ class UserProfile(models.Model):
         return self.followed_by.all().count()
 
 
+class ActivityTimeline(models.Model):
+    user = models.ForeignKey(User, related_name="timeline")
+    summary_text = models.TextField(max_length=200, null=False, blank=False)
+    target_user = models.ForeignKey(User, related_name="mentioned_timeline")
+    main_object_image = models.ImageField(blank=True, null=True)
+    target_object_image = models.ImageField(blank=True, null=True)
+    datetime = models.DateTimeField(auto_now_add=True)
+
+    def get_formatted_summary_text(self, user):
+        # summary text is about following
+        aboutfollow = True if "follow" in self.summary_text else False
+
+        # you followed yourself, you favourited your recipe, you commented on your recipe
+        if (user.id == self.user.id) and (user.id == self.target_user.id):
+            if aboutfollow:
+                return self.summary_text.format("you", "yourself")
+            return self.summary_text.format("you", "your")
+
+        # you followed someone, you favourited someone recipe, you commented on someone recipe
+        elif user.id == self.user.id:
+            if aboutfollow:
+                return self.summary_text.format("you", target_user.username)
+            return self.summary_text.format("you", target_user.username + "'s'")
+
+        # someone followed you, someone favourited your recipe, someone commented on your recipe
+        elif self.target_user.id == user.id:
+            if aboutfollow:
+                return self.summary_text.format(self.target_user.username, "you")
+            return self.summary_text.format(self.target_user.username, "your")
+
+        return self.summary_text.format(self.user.username, self.target_user.username)
+
+
 class Recipe(models.Model):
     name = models.TextField(max_length=100, null=False, blank=False)
     description = models.TextField(max_length=500, null=False, blank=False)

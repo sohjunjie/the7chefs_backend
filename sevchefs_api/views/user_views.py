@@ -77,7 +77,7 @@ class UserSignUpView(APIView):
             User.objects.create_user(username, email, password)
         except:
             return self.response_with_400("The username entered already exists")
-        return Response({'data': 'success'}, status=status.HTTP_201_CREATED)
+        return Response({"success": True}, status=status.HTTP_201_CREATED)
 
 
 class FollowUserView(APIView):

@@ -51,7 +51,7 @@ class UserProfile(models.Model):
 class ActivityTimeline(models.Model):
     user = models.ForeignKey(User, related_name="timeline")
     summary_text = models.TextField(max_length=200, null=False, blank=False)
-    target_user = models.ForeignKey(User, related_name="mentioned_timeline")
+    target_user = models.ForeignKey(User, related_name="mentioned_timeline", null=True)
     main_object_image = models.ImageField(blank=True, null=True)
     target_object_image = models.ImageField(blank=True, null=True)
     datetime = models.DateTimeField(auto_now_add=True)
@@ -59,6 +59,10 @@ class ActivityTimeline(models.Model):
     def get_formatted_summary_text(self, user):
         # summary text is about following
         aboutfollow = True if "follow" in self.summary_text else False
+        if self.target_user is None:
+            if self.user.id == user.id:
+                return self.summary_text.format("you")
+            return self.summary_text.format(self.target_user.username)
 
         # you followed yourself, you favourited your recipe, you commented on your recipe
         if (user.id == self.user.id) and (user.id == self.target_user.id):

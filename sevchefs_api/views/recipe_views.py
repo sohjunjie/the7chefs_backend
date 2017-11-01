@@ -234,12 +234,21 @@ class RecipeImageUploadView(APIView):
         recipe = RecipeUtils.get_recipe_or_404(pk)
         RecipeUtils.raise_401_if_recipe_not_belong_user(recipe, request)
 
-        print(request.body)
-
         serializer = RecipeImageSerializer(recipe, data=request.data)
         if serializer.is_valid():
+
+            recipe_just_uploaded = (not recipe.image)
+
             RecipeUtils.delete_recipe_image(recipe)
             serializer.save()
+
+            if recipe_just_uploaded:
+                ActivityTimeline.objects.create(user=request.user,
+                                                target_user=None,
+                                                main_object_image=request.user.userprofile.avatar,
+                                                target_object_image=recipe.image,
+                                                summary_text="{0} uploaded a new recipe")
+
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

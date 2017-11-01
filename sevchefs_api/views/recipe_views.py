@@ -17,7 +17,7 @@ from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from sevchefs_api.models import Recipe, RecipeTagTable, UserRecipeFavourites, \
-    RecipeIngredient, RecipeInstruction, ActivityTimeline
+    RecipeIngredient, RecipeInstruction, ActivityTimeline, Ingredient
 from sevchefs_api.serializers import RecipeSerializer, RecipeImageSerializer, \
     RecipeIngredientSerializer, RecipeInstructionImageSerializer
 
@@ -341,3 +341,28 @@ class RecipeIngredientView(APIView):
         recipe_ingredient = RecipeIngredient.objects.filter(recipe=recipe, ingredient=ingredient).first()
         recipe_ingredient.delete()
         return Response({"success": True}, status=status.HTTP_200_OK)
+
+
+class RecipeAddIngredientByNameView(APIView):
+    def post(self, request, pk):
+        """
+        Add ingredient to recipe
+        """
+        serving_size = get_request_body_param(request, 'serving_size', '').strip()
+        ingredient_name = get_request_body_param(request, 'ingredient_name', '').strip()
+        if not serving_size:
+            return Response({'detail': 'serving size of ingredient must not be empty'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not ingredient_name:
+            return Response({'detail': 'ingredient name must not be empty'}, status=status.HTTP_400_BAD_REQUEST)
+
+        recipe = RecipeUtils.get_recipe_or_404(pk)
+        RecipeUtils.raise_401_if_recipe_not_belong_user(recipe, request)
+
+        ingredient = Ingredient.objects.filter(name__iexact=ingredient_name).first()
+        if not ingredient:
+            return Response({'detail': 'ingredient with name %s could not be found' % ingredient_name}, status=status.HTTP_400_BAD_REQUEST)
+
+        RecipeIngredient.objects.create(recipe=recipe, ingredient=ingredient, serving_size=serving_size)
+
+        return Response({"success": True}, status=status.HTTP_201_CREATED)

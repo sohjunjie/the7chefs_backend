@@ -194,6 +194,17 @@ class RecipeTests(base_tests.BaseApiTest):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(recipe.ingredients.count(), 1)
 
+    def test_add_ingredient_to_recipe_by_name(self):
+        recipe = Recipe.objects.create(name='Recipe1', description='Recipe1', upload_by_user=self.user)
+        ingredient = Ingredient.objects.create(name="onion", description="onion1")
+
+        data = {'serving_size': '100 cubes',
+                'ingredient_name': ingredient.name}
+
+        response = self.client.post(reverse('recipe-ingredient-add', args=[recipe.id]), json.dumps(data), 'application/json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(recipe.ingredients.count(), 1)
+
     def test_remove_ingredient_from_recipe(self):
         recipe = Recipe.objects.create(name='Recipe1', description='Recipe1', upload_by_user=self.user)
         ingredient = Ingredient.objects.create(name="onion", description="onion1")

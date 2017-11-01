@@ -9,6 +9,7 @@ urlpatterns = [
 
     url(r'api/v1.0/recipe/(?P<pk>[0-9]+)/$', views.RecipeView.as_view(), name="recipe-view"),
     url(r'api/v1.0/recipe/(?P<pk>[0-9]+)/update/$', views.RecipeEditView.as_view(), name="recipe-edit-view"),
+    url(r'api/v1.0/recipe/(?P<pk>[0-9]+)/ingredient/add/$', views.RecipeAddIngredientByNameView.as_view(), name="recipe-ingredient-add"),
     url(r'api/v1.0/recipe/(?P<rpk>[0-9]+)/ingredient/(?P<ipk>[0-9]+)/$', views.RecipeIngredientView.as_view(), name="recipe-ingredient"),
 
     url(r'api/v1.0/recipe/list/$', views.RecipeListView.as_view(), name="recipe-list-view"),

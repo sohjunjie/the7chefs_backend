@@ -211,3 +211,24 @@ class ActivityTimelineApiTest(base_tests.BaseApiTest):
         self.assertEqual(ActivityTimeline.objects.count(), 1)
         timeline = ActivityTimeline.objects.first()
         self.assertEqual(timeline.get_formatted_summary_text(self.user), "you followed " + userOne.username + " on CookTasty")
+
+    def test_activity_timeline_list_view(self):
+        with override_settings(MEDIA_ROOT=self.media_folder):
+            # upload recipe simulate
+            recipe = Recipe.objects.create(name='Recipe1', description='Recipe1', upload_by_user=self.user)
+            image = SimpleUploadedFile(name='test_image.jpg', content=open('test_image/food.png', 'rb').read(), content_type='image/png')
+            form_data = {'image': image}
+            responseOne = self.client.post(reverse('recipe-image-upload', args=[recipe.id]), form_data, format='multipart')
+
+            # follow user simulate
+            userOne = User.objects.create(username='user1', email='user1@api.com', password='qwe123qwe123')
+            responseTwo = self.client.post(reverse('user-follow', args=[userOne.userprofile.user_id]))
+
+            # favourite recipe simulate
+            userTwo = User.objects.create_user(username='user2', email='user2@api.com', password='testpassword')
+            recipe = Recipe.objects.create(name='Recipe1', description='Recipe1', upload_by_user=userTwo)
+            responseThree = self.client.post(reverse('recipe-favourite', args=[recipe.id]))
+
+            testResponse = self.client.get(reverse('user-activity-timeline'))
+            self.assertEqual(testResponse.status_code, status.HTTP_200_OK)
+            self.assertEqual(ActivityTimeline.objects.count(), 3)

@@ -133,7 +133,7 @@ class ActivityTimelineSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ActivityTimeline
-        fields = ('user', 'target_user', 'main_object_image_url', 'target_object_image_url', 'datetime')
+        fields = ('user', 'target_user', 'main_object_image_url', 'target_object_image_url', 'datetime', 'formatted_summary_text')
 
     def get_main_object_image_url(self, activity_timeline):
 

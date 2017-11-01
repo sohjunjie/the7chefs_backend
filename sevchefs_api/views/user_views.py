@@ -1,5 +1,6 @@
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
+from django.db.models import Q
 from django.http import Http404
 
 from rest_framework import generics
@@ -11,7 +12,7 @@ from rest_framework.views import APIView
 
 from sevchefs_api.models import UserProfile, ActivityTimeline
 from sevchefs_api.utils import get_request_body_param
-from sevchefs_api.serializers import UserProfileSerializer
+from sevchefs_api.serializers import UserProfileSerializer, ActivityTimelineSerializer
 
 import re
 
@@ -151,7 +152,12 @@ class UserProfileListView(generics.ListAPIView):
 
 class UserActivityTimelineView(generics.ListAPIView):
     permission_classes = (IsAuthenticated,)
+    serializer_class = ActivityTimelineSerializer
 
     def get_queryset(self):
-        timelines = ActivityTimeline.objects.all()
+        timelines = ActivityTimeline.objects.filter(Q(user=self.request.user) |
+                                                    Q(target_user=self.request.user))
         return timelines
+
+    def get_serializer_context(self):
+        return {'request': self.request}

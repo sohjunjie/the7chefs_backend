@@ -73,8 +73,8 @@ class ActivityTimeline(models.Model):
         # you followed someone, you favourited someone recipe, you commented on someone recipe
         elif user.id == self.user.id:
             if aboutfollow:
-                return self.summary_text.format("you", target_user.username)
-            return self.summary_text.format("you", target_user.username + "'s'")
+                return self.summary_text.format("you", self.target_user.username)
+            return self.summary_text.format("you", self.target_user.username + "'s")
 
         # someone followed you, someone favourited your recipe, someone commented on your recipe
         elif self.target_user.id == user.id:

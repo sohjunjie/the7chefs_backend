@@ -281,7 +281,6 @@ class RecipeImageTest(base_tests.BaseApiTest):
             form_data = {'image': image}
             response = self.client.post(reverse('recipe-image-upload', args=[recipe.id]), form_data, format='multipart')
             self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-            self.assertEqual(ActivityTimeline.objects.count(), 1)
 
     def test_delete_image(self):
         with override_settings(MEDIA_ROOT=self.media_folder):

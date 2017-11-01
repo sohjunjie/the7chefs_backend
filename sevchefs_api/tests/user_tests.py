@@ -6,7 +6,12 @@ from rest_framework import status
 from rest_framework.authtoken.models import Token
 
 from sevchefs_api.tests import base_tests
-from sevchefs_api.models import ActivityTimeline
+from sevchefs_api.models import ActivityTimeline, Recipe
+
+from tempfile import mkdtemp
+from shutil import rmtree
+from django.test.utils import override_settings
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 
 class UserTests(base_tests.BaseGuestUser):
@@ -165,3 +170,44 @@ class FollowUnfollowApiTest(base_tests.BaseApiTest):
 
         response = self.client.delete(reverse('user-follow', args=[userOne.userprofile.user_id]))
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+class ActivityTimelineApiTest(base_tests.BaseApiTest):
+
+    def setUp(self):
+        super(ActivityTimelineApiTest, self).setUp()
+        self.media_folder = mkdtemp()
+
+    def tearDown(self):
+        super(ActivityTimelineApiTest, self).tearDown()
+        rmtree(self.media_folder)
+
+    def test_recipe_upload_timeline_created(self):
+        with override_settings(MEDIA_ROOT=self.media_folder):
+            recipe = Recipe.objects.create(name='Recipe1', description='Recipe1', upload_by_user=self.user)
+
+            image = SimpleUploadedFile(name='test_image.jpg', content=open('test_image/food.png', 'rb').read(), content_type='image/png')
+            form_data = {'image': image}
+            response = self.client.post(reverse('recipe-image-upload', args=[recipe.id]), form_data, format='multipart')
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+            self.assertEqual(ActivityTimeline.objects.count(), 1)
+            timeline = ActivityTimeline.objects.first()
+            self.assertEqual(timeline.get_formatted_summary_text(self.user), "you uploaded a new recipe")
+
+    def test_favourite_recipe_timeline_created(self):
+        other_user = User.objects.create_user('other', 'other@api.com', 'testpassword')
+        recipe = Recipe.objects.create(name='Recipe1', description='Recipe1', upload_by_user=other_user)
+
+        response = self.client.post(reverse('recipe-favourite', args=[recipe.id]))
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(ActivityTimeline.objects.count(), 1)
+        timeline = ActivityTimeline.objects.first()
+        self.assertEqual(timeline.get_formatted_summary_text(self.user), "you favourited " + other_user.username + "'s recipe")
+
+    def test_follow_user_timeline_created(self):
+        userOne = User.objects.create(username='user1', password='qwe123qwe123')
+        response = self.client.post(reverse('user-follow', args=[userOne.userprofile.user_id]))
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(ActivityTimeline.objects.count(), 1)
+        timeline = ActivityTimeline.objects.first()
+        self.assertEqual(timeline.get_formatted_summary_text(self.user), "you followed " + userOne.username + " on CookTasty")

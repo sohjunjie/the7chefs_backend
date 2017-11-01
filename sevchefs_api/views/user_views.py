@@ -5,7 +5,7 @@ from django.http import Http404
 from rest_framework import generics
 from rest_framework import status
 from rest_framework.authtoken.models import Token
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -136,13 +136,22 @@ class UserProfileView(APIView):
         return Response({'data': serializer.data}, status=status.HTTP_200_OK)
 
 
-# TODO: MIGHT BE ADAPTED FOR USER PROFILE SEARCH FILTERING
+# support search
 class UserProfileListView(generics.ListAPIView):
-    queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
     permission_classes = (AllowAny,)
 
-    def list(self, request):
-        queryset = self.get_queryset()
-        serializer = UserProfileSerializer(queryset, many=True)
-        return Response({'data': serializer.data}, status=status.HTTP_200_OK)
+    def get_queryset(self):
+        userprofiles = UserProfile.objects.all()
+        return userprofiles
+
+    def get_serializer_context(self):
+        return {'request': self.request}
+
+
+class UserActivityTimelineView(generics.ListAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        timelines = ActivityTimeline.objects.all()
+        return timelines

@@ -123,3 +123,42 @@ class RecipeInstructionImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = RecipeInstruction
         fields = ('image', )
+
+
+class ActivityTimelineSerializer(serializers.ModelSerializer):
+
+    main_object_image_url = serializers.SerializerMethodField()
+    target_object_image_url = serializers.SerializerMethodField()
+    formatted_summary_text = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ActivityTimeline
+        fields = ('user', 'target_user', 'main_object_image_url', 'target_object_image_url', 'datetime')
+
+    def get_main_object_image_url(self, activity_timeline):
+
+        if not activity_timeline.main_object_image:
+            return None
+
+        image_url = activity_timeline.main_object_image.url
+        return image_url
+
+    def get_target_object_image_url(self, activity_timeline):
+
+        if not activity_timeline.target_object_image:
+            return None
+
+        image_url = activity_timeline.target_object_image.url
+        return image_url
+
+    def get_formatted_summary_text(self, activity_timeline):
+
+        user = None
+        request = self.context.get("request")
+        if request and hasattr(request, "user"):
+            user = request.user
+
+        if user is None or user.is_anonymous():
+            return ""
+
+        return activity_timeline.get_formatted_summary_text(user).capitalize()

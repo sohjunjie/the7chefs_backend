@@ -156,13 +156,18 @@ class UserRecipeListView(generics.ListAPIView):
 
 
 class RecipeListView(generics.ListAPIView):
-    queryset = None
     serializer_class = RecipeSerializer
     permission_classes = (AllowAny,)
 
     def get_queryset(self):
-        queryset = Recipe.objects.all()
-        return queryset
+
+        recipes = Recipe.objects.all()
+
+        search = self.request.query_params.get('q', None)
+        if search is not None and search is not '':
+            recipes = recipes.filter(name__icontains=search)
+
+        return recipes
 
     def get_serializer_context(self):
         return {'request': self.request}

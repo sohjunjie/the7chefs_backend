@@ -157,6 +157,7 @@ class UserActivityTimelineView(generics.ListAPIView):
     def get_queryset(self):
         timelines = ActivityTimeline.objects.filter(Q(user=self.request.user) |
                                                     Q(target_user=self.request.user)).order_by('-datetime')
+        return timelines
 
     def get_serializer_context(self):
         return {'request': self.request}

@@ -33,4 +33,6 @@ urlpatterns = [
 
     url(r'^api/v1.0/follow/user/(?P<pk>.+)/$', views.FollowUserView.as_view(), name='user-follow'),
 
+    url(r'^api/v1.0/recipe/recommend/$', views.RecommendRecipeView.as_view(), name='recipe-recommend-view'),
+
 ]

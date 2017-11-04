@@ -32,8 +32,14 @@ class RecipeTagAdmin(admin.ModelAdmin):
     list_display = ('text',)
 
 
+class RecipeInstructionAdmin(admin.ModelAdmin):
+    model = RecipeInstruction
+    list_display = ('recipe', 'step_num', 'instruction', 'time_required', 'image')
+
+
 admin.site.register(Ingredient, IngredientAdmin)
 admin.site.register(Recipe, RecipeAdmin)
 admin.site.register(UserProfile, UserProfileAdmin)
 admin.site.register(ActivityTimeline, ActivityTimelineAdmin)
 admin.site.register(RecipeComment, RecipeCommentAdmin)
+admin.site.register(RecipeInstruction, RecipeInstructionAdmin)

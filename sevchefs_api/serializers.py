@@ -51,6 +51,40 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
         fields = ('ingredient', 'serving_size')
 
 
+class RecipeListSerializer(serializers.ModelSerializer):
+
+    image_url = serializers.SerializerMethodField()
+    is_favourited = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Recipe
+        fields = ('id', 'name', 'upload_by_user', 'difficulty_level',
+                  'upload_datetime', 'image_url', 'is_favourited')
+
+    def get_image_url(self, recipe):
+
+        if not recipe.image:
+            return None
+
+        image_url = recipe.image.url
+        return image_url
+
+    def get_is_favourited(self, recipe):
+
+        user = None
+        request = self.context.get("request")
+        if request and hasattr(request, "user"):
+            user = request.user
+
+        if user is None or user.is_anonymous():
+            return False
+
+        if not user.userprofile.favourited_recipes.filter(id=recipe.id).exists():
+            return False
+
+        return True
+
+
 class RecipeSerializer(serializers.ModelSerializer):
 
     image_url = serializers.SerializerMethodField()

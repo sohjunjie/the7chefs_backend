@@ -18,8 +18,8 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from sevchefs_api.models import Recipe, RecipeTagTable, UserRecipeFavourites, \
     RecipeIngredient, RecipeInstruction, ActivityTimeline, Ingredient
-from sevchefs_api.serializers import RecipeSerializer, RecipeImageSerializer, \
-    RecipeIngredientSerializer, RecipeInstructionImageSerializer
+from sevchefs_api.serializers import RecipeSerializer, RecipeListSerializer, \
+    RecipeImageSerializer, RecipeIngredientSerializer, RecipeInstructionImageSerializer
 
 from sevchefs_api.utils import RecipeUtils, UserUtils
 from sevchefs_api.utils import get_request_body_param
@@ -27,7 +27,7 @@ from sevchefs_api.utils import get_request_body_param
 
 class FavouritedRecipeListView(generics.ListAPIView):
 
-    serializer_class = RecipeSerializer
+    serializer_class = RecipeListSerializer
     permission_classes = (IsAuthenticated, )
 
     def get_queryset(self):
@@ -142,7 +142,7 @@ class RecipeEditView(APIView):
 
 class UserRecipeListView(generics.ListAPIView):
     queryset = Recipe.objects.all()
-    serializer_class = RecipeSerializer
+    serializer_class = RecipeListSerializer
     permission_classes = (AllowAny,)
 
     def get_queryset(self):
@@ -156,7 +156,7 @@ class UserRecipeListView(generics.ListAPIView):
 
 
 class RecipeListView(generics.ListAPIView):
-    serializer_class = RecipeSerializer
+    serializer_class = RecipeListSerializer
     permission_classes = (AllowAny,)
 
     def get_queryset(self):

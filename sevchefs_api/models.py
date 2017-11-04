@@ -108,6 +108,9 @@ class Recipe(models.Model):
         through_fields=('recipe', 'tag'),
     )
 
+    def __str__(self):
+        return self.name
+
     def get_recipe_tags(self):
         return self.tags.all()
 

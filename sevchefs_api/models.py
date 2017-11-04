@@ -144,6 +144,9 @@ class RecipeInstruction(models.Model):
     time_required = models.DurationField(null=True)
     image = models.ImageField(upload_to=recipe_instruction_image_directory_path, blank=True, null=True)
 
+    class Meta:
+        ordering = ['-step_num']
+
 
 class Ingredient(models.Model):
     name = models.TextField(max_length=100, blank=False, null=False)

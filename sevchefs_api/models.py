@@ -145,7 +145,7 @@ class RecipeInstruction(models.Model):
     image = models.ImageField(upload_to=recipe_instruction_image_directory_path, blank=True, null=True)
 
     class Meta:
-        ordering = ['-step_num']
+        ordering = ['step_num']
 
 
 class Ingredient(models.Model):

@@ -36,4 +36,8 @@
 ```
         $ python manage.py runserver
 ```
-You can create your database objects such as users manually from http://127.0.0.1:8000/admin after running the server instance with ur local machine
+
+#### 5. Before that...
+You might not be able to successfully run the server in step 4 as you will need an environment file containing the configuration variables required by the code. You the format of the environment file can be found in this [dot.env file](dot.env). You will need to rename `dot.env` to `.env`.
+
+You can now create your database objects such as users manually from http://127.0.0.1:8000/admin after running the server instance with ur local machine through the command in step 4.

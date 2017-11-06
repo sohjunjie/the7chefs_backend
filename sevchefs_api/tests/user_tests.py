@@ -66,8 +66,8 @@ class UserTests(base_tests.BaseGuestUser):
         """
         userOne = User.objects.create(username="user1", password="qwe123qwe123")
         signup_details = {'username': 'user1',
-                          'email': 'user1@example.com',
-                          'password': 'password1'}
+                          'email': 'user2@example.com',
+                          'password': 'password2'}
 
         response = self.client.post(reverse('user-signup'), json.dumps(signup_details), 'application/json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -138,7 +138,7 @@ class FollowUnfollowApiTest(base_tests.BaseApiTest):
         self.assertFalse(self.user.userprofile.follows.filter(pk=userOne.userprofile.user_id).exists())
         self.assertFalse(self.user.userprofile.follows.filter(pk=userTwo.userprofile.user_id).exists())
 
-    def test_tofollow_upon_false_args(self):
+    def test_follow_nonexist_user(self):
         """
         Ensure correct HTTP Response generated when following non-existing user
         """
@@ -155,7 +155,7 @@ class FollowUnfollowApiTest(base_tests.BaseApiTest):
         response = self.client.post(reverse('user-follow', args=[userOne.userprofile.user_id]))
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_unfollow_upon_false_args(self):
+    def test_unfollow_nonexists_user(self):
         """
         Ensure correct HTTP Response generated when unfollowing non-existing user
         """

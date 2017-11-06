@@ -61,6 +61,47 @@ class AnonymousUserRecipeTests(base_tests.BaseGuestUser):
         response = self.client.get(reverse('user-recipe-list', args=[123]))
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
+    def test_view_recipe_details(self):
+        """
+        Ensure can view details of a recipe
+        """
+        other_user = User.objects.create_user('other', 'other@api.com', 'testpassword')
+        recipe = Recipe.objects.create(name='Recipe1', description='Recipe1', upload_by_user=other_user)
+
+        response = self.client.get(reverse('recipe-view', args=[recipe.id]))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertContains(response, 'Recipe1')
+
+    def test_view_nonexist_recipe_details_404(self):
+        """
+        Ensure can view details of a recipe
+        """
+        other_user = User.objects.create_user('other', 'other@api.com', 'testpassword')
+        recipe = Recipe.objects.create(name='Recipe1', description='Recipe1', upload_by_user=other_user)
+
+        response = self.client.get(reverse('recipe-view', args=[123]))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_guestuser_cannot_favourite_recipe(self):
+        """
+        Ensure guest user cannot favourite a recipe
+        """
+        other_user = User.objects.create_user('other', 'other@api.com', 'testpassword')
+        recipe = Recipe.objects.create(name='Recipe1', description='Recipe1', upload_by_user=other_user)
+
+        response = self.client.post(reverse('recipe-favourite', args=[recipe.id]))
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_guestuser_cannot_unfavourite_recipe(self):
+        """
+        Ensure guest user cannot favourite a recipe
+        """
+        other_user = User.objects.create_user('other', 'other@api.com', 'testpassword')
+        recipe = Recipe.objects.create(name='Recipe1', description='Recipe1', upload_by_user=other_user)
+
+        response = self.client.delete(reverse('recipe-favourite', args=[recipe.id]))
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
 
 class RecipeTests(base_tests.BaseApiTest):
 
@@ -95,27 +136,17 @@ class RecipeTests(base_tests.BaseApiTest):
         response = self.client.post(reverse('recipe-comment', args=[recipe.id]))
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_view_recipe_details(self):
-        """
-        Ensure can view details of a recipe
-        """
-        other_user = User.objects.create_user('other', 'other@api.com', 'testpassword')
-        recipe = Recipe.objects.create(name='Recipe1', description='Recipe1', upload_by_user=other_user)
-
-        response = self.client.get(reverse('recipe-view', args=[recipe.id]))
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertContains(response, 'Recipe1')
-
     def test_edit_recipe(self):
 
         recipe = Recipe.objects.create(name='Recipe1', description='Recipe1', upload_by_user=self.user)
 
-        data = {'name': 'recipe2', 'description': 'new desc'}
+        data = {'name': 'recipe2', 'description': 'new desc', 'difficulty_level': 3}
         response = self.client.put(reverse('recipe-edit-view', args=[recipe.id]), json.dumps(data), 'application/json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         newrecipe = Recipe.objects.get(pk=recipe.id)
         self.assertEqual(newrecipe.name, 'recipe2')
         self.assertEqual(newrecipe.description, 'new desc')
+        self.assertEqual(newrecipe.difficulty_level, 3)
 
     def test_login_user_can_create_new_recipe(self):
         """
